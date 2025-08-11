@@ -1,5 +1,3 @@
-# AI-Powered Recipe Finder & Meal Suggestion App for Indian Cuisine Lovers
-
 ## 1. Project Title  
 **Recipify - AI Powered Recipe Finder & Meal Suggestion App**
 
