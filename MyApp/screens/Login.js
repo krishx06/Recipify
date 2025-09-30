@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Text, TextInput, Button, Surface, Icon } from 'react-native-paper';
 
-export default function Login({ onSwitch }) {
+export default function Login({ navigation, onSwitch }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -20,7 +20,7 @@ export default function Login({ onSwitch }) {
           <Text variant="bodyMedium" style={styles.subTitle}>Welcome back to Recipify</Text>
           <View style={styles.segmented}>
             <Button mode="contained" style={styles.segmentActive}>Login</Button>
-            <Button mode="text" textColor={GREEN_PRIMARY} onPress={() => onSwitch && onSwitch('signup')}>
+            <Button mode="text" textColor={GREEN_PRIMARY} onPress={() => (onSwitch ? onSwitch('signup') : navigation?.navigate('Signup'))}>
               Register
             </Button>
           </View>
@@ -52,11 +52,11 @@ export default function Login({ onSwitch }) {
             />
           </View>
 
-          <Button mode="contained" onPress={() => {}} style={styles.cta}>
+          <Button mode="contained" onPress={() => navigation?.navigate('Home')} style={styles.cta}>
             Login
           </Button>
 
-          <Button mode="outlined" onPress={() => {}} style={styles.secondary}>
+          <Button mode="outlined" onPress={() => navigation?.navigate('Home')} style={styles.secondary}>
             Continue as Guest
           </Button>
         </Surface>

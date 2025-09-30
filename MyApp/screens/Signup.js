@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Text, TextInput, Button, Surface, Icon } from 'react-native-paper';
 
-export default function Signup({ onSwitch }) {
+export default function Signup({ navigation, onSwitch }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,7 +20,7 @@ export default function Signup({ onSwitch }) {
           <Text variant="headlineLarge" style={styles.title}>Register</Text>
           <Text variant="bodyMedium" style={styles.subTitle}>Create your Recipify account</Text>
           <View style={styles.segmented}>
-            <Button mode="text" textColor={GREEN_PRIMARY} onPress={() => onSwitch && onSwitch('login')}>
+            <Button mode="text" textColor={GREEN_PRIMARY} onPress={() => (onSwitch ? onSwitch('login') : navigation?.navigate('Login'))}>
               Login
             </Button>
             <Button mode="contained" style={styles.segmentActive}>Register</Button>
@@ -64,11 +64,11 @@ export default function Signup({ onSwitch }) {
             />
           </View>
 
-          <Button mode="contained" onPress={() => {}} style={styles.cta}>
+          <Button mode="contained" onPress={() => navigation?.navigate('Home')} style={styles.cta}>
             Sign Up
           </Button>
 
-          <Button mode="outlined" onPress={() => {}} style={styles.secondary}>
+          <Button mode="outlined" onPress={() => navigation?.navigate('Home')} style={styles.secondary}>
             Continue as Guest
           </Button>
         </Surface>

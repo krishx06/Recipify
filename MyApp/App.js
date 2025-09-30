@@ -1,9 +1,12 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Animated, Easing } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { PaperProvider, MD3LightTheme, configureFonts } from 'react-native-paper';
 import Login from './screens/Login';
 import Signup from './screens/Signup';
+import Home from './screens/Home';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const fontConfig = {
   bodyLarge: { fontFamily: 'System', fontWeight: '400', fontSize: 16 },
@@ -21,48 +24,23 @@ const theme = {
   fonts: configureFonts({ config: fontConfig }),
 };
 
+const Stack = createNativeStackNavigator();
+
 export default function App() {
-  const [screen, setScreen] = useState('login');
-  const opacity = useRef(new Animated.Value(1)).current;
-  const translateY = useRef(new Animated.Value(0)).current;
-
-  const animateIn = () => {
-    opacity.setValue(0);
-    translateY.setValue(10);
-    Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: 220, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-      Animated.timing(translateY, { toValue: 0, duration: 220, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-    ]).start();
-  };
-
-  const handleSwitch = (next) => {
-    Animated.parallel([
-      Animated.timing(opacity, { toValue: 0, duration: 160, easing: Easing.in(Easing.quad), useNativeDriver: true }),
-      Animated.timing(translateY, { toValue: -10, duration: 160, easing: Easing.in(Easing.quad), useNativeDriver: true }),
-    ]).start(() => {
-      setScreen(next);
-      animateIn();
-    });
-  };
   return (
     <PaperProvider theme={theme}>
-      <View style={styles.container}>
-        <Animated.View style={{ flex: 1, opacity, transform: [{ translateY }] }}>
-          {screen === 'login' ? (
-            <Login onSwitch={handleSwitch} />
-          ) : (
-            <Signup onSwitch={handleSwitch} />
-          )}
-        </Animated.View>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Signup" component={Signup} />
+          <Stack.Screen name="Home" component={Home} />
+        </Stack.Navigator>
         <StatusBar style="dark" />
-      </View>
+      </NavigationContainer>
     </PaperProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
+  container: {},
 });
