@@ -9,7 +9,7 @@ export default function Home({ navigation }) {
   return (
     <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
       <Surface style={styles.header} elevation={0}>
-        <Text variant="headlineMedium" style={styles.greeting}>Hi Krish 👋</Text>
+        <Text variant="headlineMedium" style={styles.greeting}>  Hey MasterChef!👋</Text>
         <Text variant="bodyLarge" style={styles.sub}>What are we cookin' today?</Text>
       </Surface>
 

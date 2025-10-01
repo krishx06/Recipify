@@ -1,31 +1,55 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, FlatList } from 'react-native';
-import { Text, TextInput, Button, Card, Surface, IconButton } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, FlatList, TouchableOpacity } from 'react-native';
+import { Text, TextInput, Button, Card, Surface, IconButton, Chip } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import sampleRecipes from './sampleRecipes';
 
+const POPULAR_INGREDIENTS = [
+  { name: 'Potato', icon: '🥔', hindi: 'आलू' },
+  { name: 'Tomato', icon: '🍅', hindi: 'टमाटर' },
+  { name: 'Onion', icon: '🧅', hindi: 'प्याज़' },
+  { name: 'Rice', icon: '🍚', hindi: 'चावल' },
+  { name: 'Chicken', icon: '🍗', hindi: 'मुर्गी' },
+  { name: 'Lentils', icon: '🫘', hindi: 'दाल' },
+  { name: 'Garlic', icon: '🧄', hindi: 'लहसुन' },
+  { name: 'Ginger', icon: '🫚', hindi: 'अदरक' },
+];
+
+const INGREDIENT_SUGGESTIONS = [
+  { name: 'Rice', icon: '🍚', hindi: 'चावल' },
+  { name: 'Wheat', icon: '🌾', hindi: 'गेहूं' },
+  { name: 'Barley', icon: '🌾', hindi: 'जौ' },
+];
+
 export default function IngredientSearch({ navigation }) {
   const insets = useSafeAreaInsets();
-  const [ingredients, setIngredients] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedIngredients, setSelectedIngredients] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
   const filteredRecipes = useMemo(() => {
-    if (!ingredients.trim()) return [];
+    if (selectedIngredients.length === 0) return [];
     
-    const searchTerms = ingredients
-      .split(',')
-      .map(term => term.trim().toLowerCase())
-      .filter(term => term.length > 0);
-
-    if (searchTerms.length === 0) return [];
-
     return sampleRecipes.filter(recipe => {
       const recipeIngredients = recipe.ingredients.map(ing => ing.toLowerCase());
-      return searchTerms.every(term => 
-        recipeIngredients.some(ing => ing.includes(term))
+      return selectedIngredients.every(ingredient => 
+        recipeIngredients.some(ing => ing.includes(ingredient.toLowerCase()))
       );
     });
-  }, [ingredients]);
+  }, [selectedIngredients]);
+
+  const addIngredient = (ingredient) => {
+    if (!selectedIngredients.includes(ingredient)) {
+      setSelectedIngredients([...selectedIngredients, ingredient]);
+    }
+    setSearchQuery('');
+    setShowSuggestions(false);
+  };
+
+  const removeIngredient = (ingredient) => {
+    setSelectedIngredients(selectedIngredients.filter(ing => ing !== ingredient));
+  };
 
   const handleSearch = () => {
     setHasSearched(true);
@@ -62,30 +86,103 @@ export default function IngredientSearch({ navigation }) {
           style={styles.backButton}
         />
         <View style={styles.headerContent}>
-          <Text variant="headlineMedium" style={styles.title}>Ingredient Search</Text>
+          <Text variant="headlineMedium" style={styles.title}>What's in your kitchen?</Text>
           <Text variant="bodyMedium" style={styles.subtitle}>
-            Enter ingredients separated by commas
+            Add ingredients and we'll find perfect recipes for you
           </Text>
         </View>
       </View>
 
       <View style={styles.searchContainer}>
-        <TextInput
-          mode="outlined"
-          label="Ingredients"
-          placeholder="e.g., chicken, rice, onion, garlic"
-          value={ingredients}
-          onChangeText={setIngredients}
-          style={styles.searchInput}
-          multiline
-        />
+        <View style={styles.searchBarContainer}>
+          <TextInput
+            mode="outlined"
+            placeholder="Type ingredients... e.g., 'आलू' or 'Potato'"
+            value={searchQuery}
+            onChangeText={(text) => {
+              setSearchQuery(text);
+              setShowSuggestions(text.length > 0);
+            }}
+            style={styles.searchInput}
+            left={<TextInput.Icon icon="magnify" />}
+            right={
+              <View style={styles.searchRight}>
+                <TextInput.Icon icon="microphone" />
+                <TouchableOpacity 
+                  style={styles.addButton}
+                  onPress={() => {
+                    if (searchQuery.trim()) {
+                      addIngredient(searchQuery.trim());
+                    }
+                  }}
+                >
+                  <Text style={styles.addButtonText}>+</Text>
+                </TouchableOpacity>
+              </View>
+            }
+          />
+        </View>
+
+        {showSuggestions && (
+          <View style={styles.suggestionBox}>
+            {INGREDIENT_SUGGESTIONS
+              .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map((item, index) => (
+                <TouchableOpacity 
+                  key={index}
+                  style={styles.suggestionItem}
+                  onPress={() => addIngredient(item.name)}
+                >
+                  <Text style={styles.suggestionIcon}>{item.icon}</Text>
+                  <View style={styles.suggestionText}>
+                    <Text style={styles.suggestionName}>{item.name}</Text>
+                    <Text style={styles.suggestionHindi}>{item.hindi}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))
+            }
+          </View>
+        )}
+
+        {selectedIngredients.length > 0 && (
+          <View style={styles.selectedContainer}>
+            {selectedIngredients.map((ingredient, index) => (
+              <Chip
+                key={index}
+                style={styles.selectedChip}
+                onClose={() => removeIngredient(ingredient)}
+                closeIcon="close"
+              >
+                {ingredient}
+              </Chip>
+            ))}
+          </View>
+        )}
+
+        <View style={styles.popularSection}>
+          <Text variant="titleMedium" style={styles.popularTitle}>Popular ingredients:</Text>
+          <View style={styles.popularGrid}>
+            {POPULAR_INGREDIENTS.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.popularItem}
+                onPress={() => addIngredient(item.name)}
+              >
+                <Text style={styles.popularIcon}>{item.icon}</Text>
+                <Text style={styles.popularName}>{item.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
         <Button 
           mode="contained" 
-          style={styles.searchButton}
+          style={styles.findButton}
           onPress={handleSearch}
-          disabled={!ingredients.trim()}
+          disabled={selectedIngredients.length === 0}
+          icon="star"
         >
-          Search Recipes
+          Find {filteredRecipes.length} Recipes
         </Button>
       </View>
 
@@ -144,7 +241,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    color: '#1b1b1b',
+    color: GREEN_PRIMARY,
     fontWeight: '700',
     marginBottom: 8,
   },
@@ -156,13 +253,100 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 20,
   },
+  searchBarContainer: {
+    marginBottom: 12,
+  },
   searchInput: {
     backgroundColor: '#ffffff',
-    marginBottom: 16,
   },
-  searchButton: {
+  searchRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  addButton: {
+    backgroundColor: GREEN_PRIMARY,
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  suggestionBox: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    marginBottom: 12,
+    padding: 12,
+  },
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  suggestionIcon: {
+    fontSize: 20,
+    marginRight: 12,
+  },
+  suggestionText: {
+    flex: 1,
+  },
+  suggestionName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1b1b1b',
+  },
+  suggestionHindi: {
+    fontSize: 14,
+    color: '#6b6b6b',
+  },
+  selectedContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 20,
+  },
+  selectedChip: {
+    backgroundColor: GREEN_PRIMARY,
+  },
+  popularSection: {
+    marginBottom: 20,
+  },
+  popularTitle: {
+    color: '#1b1b1b',
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  popularGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  popularItem: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  popularIcon: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  popularName: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#1b1b1b',
+    textAlign: 'center',
+  },
+  findButton: {
     backgroundColor: GREEN_PRIMARY,
     borderRadius: 25,
+    paddingVertical: 8,
   },
   resultsContainer: {
     flex: 1,
