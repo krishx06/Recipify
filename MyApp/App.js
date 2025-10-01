@@ -5,6 +5,8 @@ import { PaperProvider, MD3LightTheme, configureFonts } from 'react-native-paper
 import Login from './screens/Login';
 import Signup from './screens/Signup';
 import Home from './screens/Home';
+import Explore from './screens/Explore';
+import IngredientSearch from './screens/IngredientSearch';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -34,6 +36,8 @@ export default function App() {
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Signup" component={Signup} />
           <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="Explore" component={Explore} />
+          <Stack.Screen name="IngredientSearch" component={IngredientSearch} />
         </Stack.Navigator>
         <StatusBar style="dark" />
       </NavigationContainer>
