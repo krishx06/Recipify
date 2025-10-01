@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, FlatList, TouchableOpacity } from 'react-native';
 import { Text, TextInput, Button, Card, Surface, IconButton, Chip } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import sampleRecipes from './sampleRecipes';
+import { searchRecipesByIngredients } from './api';
 
 const POPULAR_INGREDIENTS = [
   { name: 'Potato', icon: '🥔', hindi: 'आलू' },
@@ -28,16 +28,7 @@ export default function IngredientSearch({ navigation }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const filteredRecipes = useMemo(() => {
-    if (selectedIngredients.length === 0) return [];
-    
-    return sampleRecipes.filter(recipe => {
-      const recipeIngredients = recipe.ingredients.map(ing => ing.toLowerCase());
-      return selectedIngredients.every(ingredient => 
-        recipeIngredients.some(ing => ing.includes(ingredient.toLowerCase()))
-      );
-    });
-  }, [selectedIngredients]);
+  const [filteredRecipes, setFilteredRecipes] = useState([]);
 
   const addIngredient = (ingredient) => {
     if (!selectedIngredients.includes(ingredient)) {
@@ -51,8 +42,14 @@ export default function IngredientSearch({ navigation }) {
     setSelectedIngredients(selectedIngredients.filter(ing => ing !== ingredient));
   };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     setHasSearched(true);
+    try {
+      const data = await searchRecipesByIngredients(selectedIngredients, 20);
+      setFilteredRecipes(data);
+    } catch (e) {
+      setFilteredRecipes([]);
+    }
   };
 
   const renderRecipe = ({ item }) => (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Button, Card } from 'react-native-paper';
-import sampleRecipes from '../sampleRecipes';
+import { fetchRandomIndianRecipes } from '../api';
 
 export const CUISINES = [
   'North Indian',
@@ -26,18 +26,49 @@ function inferCuisine(recipe) {
 
 export default function CuisineFilter({ onFilterChange, showGrid = true }) {
   const [selectedCuisine, setSelectedCuisine] = React.useState('All');
-
-  const filtered = React.useMemo(() => {
-    if (selectedCuisine === 'All') {
-      return sampleRecipes;
-    }
-    return sampleRecipes.filter((r) => inferCuisine(r) === selectedCuisine);
-  }, [selectedCuisine]);
+  const [allRecipes, setAllRecipes] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
-    if (onFilterChange) {
-      onFilterChange(filtered);
+    const load = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchRandomIndianRecipes(30);
+        setAllRecipes(data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const filtered = React.useMemo(() => {
+    let source = allRecipes;
+    if (selectedCuisine === 'All') return source;
+    // Heuristic mapping from cuisines array text to our main buckets
+    const match = (cuisines, needles) => {
+      const c = (cuisines || []).map((x) => String(x).toLowerCase());
+      return needles.some((n) => c.includes(n));
+    };
+    switch (selectedCuisine) {
+      case 'South Indian':
+        return source.filter((r) => match(r.cuisines, ['south indian', 'kerala', 'karnataka', 'tamil', 'andhra', 'hyderabadi']));
+      case 'West Indian':
+        return source.filter((r) => match(r.cuisines, ['gujarati', 'maharashtrian', 'goan', 'konkani', 'parsi', 'west indian']));
+      case 'East Indian':
+        return source.filter((r) => match(r.cuisines, ['bengali', 'assamese', 'odia', 'east indian']));
+      case 'Central Indian':
+        return source.filter((r) => match(r.cuisines, ['central indian', 'malwi', 'bundelkhandi', 'bagheli', 'chhattisgarhi']));
+      case 'Fusion':
+        return source.filter((r) => match(r.cuisines, ['fusion', 'indo-chinese']));
+      case 'North Indian':
+      default:
+        return source.filter((r) => match(r.cuisines, ['north indian', 'punjabi', 'awadhi', 'kashmiri', 'rajasthani', 'mughlai', 'indian']));
     }
+  }, [selectedCuisine, allRecipes]);
+
+  React.useEffect(() => {
+    onFilterChange && onFilterChange(filtered);
   }, [filtered, onFilterChange]);
 
   return (

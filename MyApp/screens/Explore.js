@@ -2,24 +2,42 @@ import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, FlatList } from 'react-native';
 import { Text, Card, Button, Surface, IconButton, Searchbar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import sampleRecipes from './sampleRecipes';
 import CuisineFilter from './components/CuisineFilter';
+import { fetchRandomIndianRecipes } from './api';
 
 export default function Explore({ navigation }) {
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
-  const [cuisineFilteredRecipes, setCuisineFilteredRecipes] = useState(sampleRecipes);
+  const [cuisineFilteredRecipes, setCuisineFilteredRecipes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  React.useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const data = await fetchRandomIndianRecipes(20);
+        setCuisineFilteredRecipes(data);
+      } catch (e) {
+        setError('Failed to load recipes.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const filteredRecipes = useMemo(() => {
-    let filtered = cuisineFilteredRecipes;
+    let filtered = cuisineFilteredRecipes || [];
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(recipe => 
-        recipe.name.toLowerCase().includes(query) ||
-        recipe.category.toLowerCase().includes(query) ||
-        recipe.ingredients.some(ing => ing.toLowerCase().includes(query))
-      );
+      filtered = filtered.filter((recipe) => {
+        const name = (recipe.name || '').toLowerCase();
+        const cuisinesText = (recipe.cuisines || []).join(' ').toLowerCase();
+        return name.includes(query) || cuisinesText.includes(query);
+      });
     }
 
     return filtered;
@@ -57,9 +75,9 @@ export default function Explore({ navigation }) {
         />
         <View style={styles.headerContent}>
           <Text variant="headlineMedium" style={styles.title}>Explore Recipes</Text>
-          <Text variant="bodyMedium" style={styles.subtitle}>
-            Discover {filteredRecipes.length} delicious Indian recipes
-          </Text>
+        <Text variant="bodyMedium" style={styles.subtitle}>
+          {loading ? 'Loading recipes...' : `Discover ${filteredRecipes.length} delicious Indian recipes`}
+        </Text>
         </View>
       </View>
 
@@ -74,6 +92,10 @@ export default function Explore({ navigation }) {
         onFilterChange={setCuisineFilteredRecipes}
         showGrid={false}
       />
+
+      {error ? (
+        <Text style={{ textAlign: 'center', color: 'red', padding: 16 }}>{error}</Text>
+      ) : null}
 
       <FlatList
         data={filteredRecipes}
