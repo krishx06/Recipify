@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     flex: 1,
+    marginLeft: -24,
     alignItems: 'center',
   },
   title: {

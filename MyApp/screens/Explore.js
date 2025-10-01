@@ -1,11 +1,29 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, FlatList } from 'react-native';
-import { Text, Card, Button, Surface, IconButton } from 'react-native-paper';
+import { Text, Card, Button, Surface, IconButton, Searchbar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import sampleRecipes from './sampleRecipes';
+import CuisineFilter from './components/CuisineFilter';
 
 export default function Explore({ navigation }) {
   const insets = useSafeAreaInsets();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cuisineFilteredRecipes, setCuisineFilteredRecipes] = useState(sampleRecipes);
+
+  const filteredRecipes = useMemo(() => {
+    let filtered = cuisineFilteredRecipes;
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(recipe => 
+        recipe.name.toLowerCase().includes(query) ||
+        recipe.category.toLowerCase().includes(query) ||
+        recipe.ingredients.some(ing => ing.toLowerCase().includes(query))
+      );
+    }
+
+    return filtered;
+  }, [searchQuery, cuisineFilteredRecipes]);
 
   const renderRecipe = ({ item }) => (
     <Card style={styles.recipeCard} mode="elevated">
@@ -22,7 +40,7 @@ export default function Explore({ navigation }) {
             console.log('See process for:', item.name);
           }}
         >
-          See Process
+          See Recipe
         </Button>
       </Card.Content>
     </Card>
@@ -40,13 +58,25 @@ export default function Explore({ navigation }) {
         <View style={styles.headerContent}>
           <Text variant="headlineMedium" style={styles.title}>Explore Recipes</Text>
           <Text variant="bodyMedium" style={styles.subtitle}>
-            Discover {sampleRecipes.length} delicious Indian recipes
+            Discover {filteredRecipes.length} delicious Indian recipes
           </Text>
         </View>
       </View>
 
+      <Searchbar
+        placeholder="Search any recipe..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        style={styles.searchBar}
+      />
+
+      <CuisineFilter 
+        onFilterChange={setCuisineFilteredRecipes}
+        showGrid={false}
+      />
+
       <FlatList
-        data={sampleRecipes}
+        data={filteredRecipes}
         renderItem={renderRecipe}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
@@ -88,6 +118,11 @@ const styles = StyleSheet.create({
   subtitle: {
     color: '#4d4d4d',
     textAlign: 'center',
+  },
+  searchBar: {
+    marginHorizontal: 16,
+    marginBottom: 10,
+    backgroundColor: '#ffffff',
   },
   listContainer: {
     paddingHorizontal: 16,

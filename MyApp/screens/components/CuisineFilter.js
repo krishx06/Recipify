@@ -3,51 +3,69 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Button, Card } from 'react-native-paper';
 import sampleRecipes from '../sampleRecipes';
 
-export const CUISINES = {
-  'North Indian': ['Punjabi', 'Awadhi', 'Kashmiri', 'Rajasthani', 'Mughlai'],
-  'South Indian': ['Tamil', 'Andhra', 'Kerala', 'Karnataka', 'Hyderabadi'],
-  'West Indian': ['Gujarati', 'Maharashtrian', 'Goan', 'Konkani', 'Parsi'],
-  'East Indian': ['Bengali', 'Assamese', 'Odia', 'Manipuri', 'Sikkimese'],
-  'Central Indian': ['Malwi', 'Bundelkhandi', 'Bagheli', 'Chhattisgarhi'],
-  Fusion: ['Indo-Chinese', 'Indo-Italian', 'Indo-Thai', 'Street Fusion', 'Continental'],
-};
+export const CUISINES = [
+  'North Indian',
+  'South Indian', 
+  'West Indian',
+  'East Indian',
+  'Central Indian',
+  'Fusion'
+];
 
-function inferSubCuisine(recipe) {
+function inferCuisine(recipe) {
   const name = (recipe?.name || '').toLowerCase();
-  if (name.includes('dosa')) return 'Karnataka';
-  if (name.includes('biryani')) return 'Hyderabadi';
-  if (name.includes('paneer') || name.includes('butter masala')) return 'Punjabi';
-  if (name.includes('stir fry')) return 'Indo-Chinese';
-  if (name.includes('spaghetti')) return 'Indo-Italian';
-  if (name.includes('soup')) return 'Continental';
-  if (name.includes('salad') || name.includes('sandwich') || name.includes('wrap')) return 'Street Fusion';
-  if (name.includes('pancake') || name.includes('cookie') || name.includes('cake') || name.includes('oatmeal') || name.includes('smoothie')) return 'Continental';
-  return 'Indo-Thai';
+  if (name.includes('dosa') || name.includes('idli') || name.includes('sambhar')) return 'South Indian';
+  if (name.includes('biryani') || name.includes('paneer') || name.includes('butter masala')) return 'North Indian';
+  if (name.includes('stir fry') || name.includes('noodles')) return 'Fusion';
+  if (name.includes('spaghetti') || name.includes('soup') || name.includes('salad') || 
+      name.includes('pancake') || name.includes('cookie') || name.includes('cake')) return 'Fusion';
+  if (name.includes('sandwich') || name.includes('wrap') || name.includes('smoothie')) return 'Fusion';
+  if (name.includes('masala') || name.includes('curry') || name.includes('dal')) return 'North Indian';
+  return 'North Indian';
 }
 
-export default function CuisineFilter() {
-  const [selectedMain, setSelectedMain] = React.useState('North Indian');
-  const [selectedSub, setSelectedSub] = React.useState(CUISINES['North Indian'][0]);
+export default function CuisineFilter({ onFilterChange, showGrid = true }) {
+  const [selectedCuisine, setSelectedCuisine] = React.useState('All');
 
   const filtered = React.useMemo(() => {
-    return sampleRecipes.filter((r) => inferSubCuisine(r) === selectedSub);
-  }, [selectedSub]);
+    if (selectedCuisine === 'All') {
+      return sampleRecipes;
+    }
+    return sampleRecipes.filter((r) => inferCuisine(r) === selectedCuisine);
+  }, [selectedCuisine]);
 
-  const subCuisines = CUISINES[selectedMain] || [];
+  React.useEffect(() => {
+    if (onFilterChange) {
+      onFilterChange(filtered);
+    }
+  }, [filtered, onFilterChange]);
 
   return (
     <View style={styles.container}>
       <Text variant="titleMedium" style={styles.title}>Explore by Cuisine</Text>
+      <Text variant="bodySmall" style={styles.subtitle}>
+        Take a culinary journey across different regions and flavors
+      </Text>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
-        {Object.keys(CUISINES).map((c) => (
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false} 
+        contentContainerStyle={styles.row}
+        style={styles.scrollView}
+      >
+        <Button
+          key="All"
+          mode={selectedCuisine === 'All' ? 'contained' : 'outlined'}
+          onPress={() => setSelectedCuisine('All')}
+          style={styles.chip}
+        >
+          All
+        </Button>
+        {CUISINES.map((c) => (
           <Button
             key={c}
-            mode={selectedMain === c ? 'contained' : 'outlined'}
-            onPress={() => {
-              setSelectedMain(c);
-              setSelectedSub(CUISINES[c][0]);
-            }}
+            mode={selectedCuisine === c ? 'contained' : 'outlined'}
+            onPress={() => setSelectedCuisine(c)}
             style={styles.chip}
           >
             {c}
@@ -55,30 +73,19 @@ export default function CuisineFilter() {
         ))}
       </ScrollView>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
-        {subCuisines.map((s) => (
-          <Button
-            key={s}
-            mode={selectedSub === s ? 'contained' : 'outlined'}
-            onPress={() => setSelectedSub(s)}
-            style={styles.chip}
-          >
-            {s}
-          </Button>
-        ))}
-      </ScrollView>
-
-      <View style={styles.grid}>
-        {filtered.map((r) => (
-          <Card key={r.id} style={styles.card}>
-            <Card.Cover source={{ uri: r.image }} />
-            <Card.Title title={r.name} titleNumberOfLines={2} />
-          </Card>
-        ))}
-        {filtered.length === 0 && (
-          <Text style={styles.empty}>No recipes found for {selectedSub}</Text>
-        )}
-      </View>
+      {showGrid && (
+        <View style={styles.grid}>
+          {filtered.map((r) => (
+            <Card key={r.id} style={styles.card}>
+              <Card.Cover source={{ uri: r.image }} />
+              <Card.Title title={r.name} titleNumberOfLines={2} />
+            </Card>
+          ))}
+          {filtered.length === 0 && (
+            <Text style={styles.empty}>No recipes found for {selectedCuisine}</Text>
+          )}
+        </View>
+      )}
     </View>
   );
 }
@@ -87,18 +94,29 @@ const GREEN_PRIMARY = '#2E7D32';
 
 const styles = StyleSheet.create({
   container: {
+    paddingHorizontal: 16,
     marginTop: 12,
+    marginLeft: 5,
   },
   title: {
     color: GREEN_PRIMARY,
-    marginBottom: 8,
+    marginBottom: 6,
+  },
+  subtitle: {
+    color: '#6b6b6b',
+    marginBottom: 12,
+  },
+  scrollView: {
+    marginHorizontal: -18,
+    marginBottom: 18,
   },
   row: {
     gap: 8,
     paddingVertical: 4,
+    paddingHorizontal: 16,
   },
   chip: {
-    marginRight: 8,
+    marginRight: 0,
     borderRadius: 18,
   },
   grid: {
