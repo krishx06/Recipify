@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "owner": "krishx06",
+    "name": "RecipifyApp",
+    "slug": "RecipifyApp",
+    "scheme": "recipify",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "bundleIdentifier": "com.recipify.app.ios",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.recipify.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/images/icon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "dada7f95-9962-445d-a79a-5d7ffdf024a2"
+      }
+    },
+    "plugins": [
+      "expo-web-browser"
+    ]
+  }
+}
