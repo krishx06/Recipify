@@ -1,4 +1,4 @@
-// frontend/src/components/RecipifyFooter.js
+
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,11 +18,10 @@ export default function RecipifyFooter() {
 
 const styles = StyleSheet.create({
   footer: {
-    marginTop: 30,
-    marginBottom: 20,
+    marginTop: 50,
+    marginBottom: -40,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 10,
   },
 
   text: {

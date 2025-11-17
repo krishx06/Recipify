@@ -1,35 +1,29 @@
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 
-export default function WelcomeScreen() {
+import React from "react";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+
+export default function WelcomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      
-
       <View style={styles.centerContent}>
         <Text style={styles.heading}>Recipify.</Text>
-
         <Text style={styles.tagline}>
-        Discover recipes that turn everyday ingredients into extraordinary meals.
+          Discover recipes that turn everyday ingredients into extraordinary meals.
         </Text>
       </View>
 
-
       <View style={styles.bottomButtons}>
-
-        <TouchableOpacity style={styles.primaryButton}>
-          <Text style={styles.primaryButtonText}>Create account</Text>
-        </TouchableOpacity>
-
-
-        <TouchableOpacity style={styles.secondaryButton}>
-          <Text style={styles.secondaryButtonText}>Sign in</Text>
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={() => navigation.navigate("Login")}  
+        >
+          <Text style={styles.primaryButtonText}>Get Started</Text>
         </TouchableOpacity>
       </View>
-
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -78,20 +72,6 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontFamily: 'TransformaSemiBold',
-  },
-
-  secondaryButton: {
-    width: '100%',
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#e11932',
-    alignItems: 'center',
-  },
-  secondaryButtonText: {
-    color: '#e11932',
     fontSize: 16,
     fontFamily: 'TransformaSemiBold',
   },

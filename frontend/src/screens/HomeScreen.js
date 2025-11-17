@@ -1,49 +1,71 @@
+
 import React, { useContext } from "react";
-import { View, Text, StyleSheet, Image, ScrollView, Platform } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
+
 import AuthContext from "../context/AuthContext";
 import RandomRecipeCard from "../components/RandomRecipeCard";
 import PopularSection from "../components/PopularSection";
 import FeatureCards from "../components/FeatureCards";
 import RecipifyFooter from "../components/RecipifyFooter";
 
-
-export default function HomeScreen() {
-  const auth = useContext(AuthContext) || {};
-  const user = auth.user || { name: "Friend", avatar: null };
+export default function HomeScreen({ navigation }) {
+  const { user, logout } = useContext(AuthContext) || {
+    user: { name: "Friend", avatar: null },
+    logout: () => {},
+  };
 
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: 80 }}
       showsVerticalScrollIndicator={false}
     >
-      {/* ========= HEADER ========= */}
+
       <View style={styles.header}>
+
         <View style={styles.avatarContainer}>
-          {user.avatar ? (
+          {user?.avatar ? (
             <Image source={{ uri: user.avatar }} style={styles.avatar} />
           ) : (
             <View style={styles.placeholderAvatar}>
               <Text style={styles.initial}>
-                {user.name.charAt(0).toUpperCase()}
+                {user?.name?.charAt(0)?.toUpperCase() || "F"}
               </Text>
             </View>
           )}
         </View>
 
-        <View>
-          <Text style={styles.welcome}>Welcome {user.name.split(" ")[0]}</Text>
+
+        <View style={{ flex: 1 }}>
+          <Text style={styles.welcome}>
+            Welcome {user?.name?.split(" ")[0] || "Friend"}
+          </Text>
           <Text style={styles.subtext}>What do you want to cook today?</Text>
         </View>
+
+
+        <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* -------- RANDOM RECIPE CARD -------- */}
-      <RandomRecipeCard />
-      <FeatureCards />
-      
 
-      {/* -------- POPULAR SECTION -------- */}
+      <FeatureCards navigation={navigation} />
+
+
+      <RandomRecipeCard />
+
+
       <PopularSection />
+
 
       <RecipifyFooter />
     </ScrollView>
@@ -54,14 +76,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? 40 : 55,
+    paddingTop: Platform.OS === "android" ? 40 : 60,
     backgroundColor: "#fff",
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 18,
+    marginBottom: 22,
     gap: 12,
   },
 
@@ -98,7 +120,7 @@ const styles = StyleSheet.create({
   welcome: {
     fontSize: 22,
     fontFamily: "TransformaSemiBold",
-    color: "#e11932"
+    color: "#e11932",
   },
 
   subtext: {
@@ -107,4 +129,15 @@ const styles = StyleSheet.create({
     color: "#212121",
     marginTop: 2,
   },
+
+  logoutButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  logoutText: {
+    color: "#e11932",
+    fontFamily: "LatoBold",
+    fontSize: 14,
+  },
 });
+

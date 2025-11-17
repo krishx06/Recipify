@@ -1,4 +1,4 @@
-// frontend/src/components/FeatureCards.js
+
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,8 +7,8 @@ export default function FeatureCards({ navigation }) {
   return (
     <View style={styles.wrapper}>
       
-      {/* Explore Recipes */}
-      <TouchableOpacity 
+
+      <TouchableOpacity
         style={styles.card}
         onPress={() => navigation.navigate("Explore")}
       >
@@ -20,10 +20,10 @@ export default function FeatureCards({ navigation }) {
         <Ionicons name="arrow-forward-circle" size={32} color="#e11932" />
       </TouchableOpacity>
 
-      {/* Ingredient Search */}
-      <TouchableOpacity 
+
+      <TouchableOpacity
         style={styles.card}
-        onPress={() => navigation.navigate("IngredientSearch")}
+        onPress={() => navigation.navigate("SearchAI")}   
       >
         <View>
           <Text style={styles.title}>Search by Ingredients</Text>
@@ -52,7 +52,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
 
-    // shadow
     shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 12,
@@ -71,5 +70,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "LatoRegular",
     color: "#666",
-  },
+  }
 });
