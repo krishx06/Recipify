@@ -1,4 +1,3 @@
-
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,10 +5,11 @@ import { Ionicons } from "@expo/vector-icons";
 export default function RecipifyFooter() {
   return (
     <View style={styles.footer}>
-      <Text style={styles.text}>
-        Developed with{" "}
-        <Ionicons name="heart" size={14} color="#e11932" /> by Krish
-      </Text>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Text style={styles.text}>Developed with </Text>
+        <Ionicons name="heart" size={14} color="#e11932" />
+        <Text style={styles.text}> by Krish</Text>
+      </View>
 
       <Text style={styles.copy}>© 2025 Recipify</Text>
     </View>
