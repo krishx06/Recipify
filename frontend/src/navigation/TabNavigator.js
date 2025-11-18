@@ -1,13 +1,11 @@
-
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform } from "react-native";
 
-
 import HomeScreen from "../screens/HomeScreen";
 import ExploreScreen from "../screens/ExploreScreen";
-import IngredientSearchScreen from "../screens/IngredientSearchScreen";
+import IngredientSearchScreen from "../screens/AIChefScreen";
 import FavoritesScreen from "../screens/FavoritesScreen";
 
 const Tab = createBottomTabNavigator();
@@ -19,12 +17,11 @@ export default function TabNavigator() {
       screenOptions={({ route }) => ({
         headerShown: false,
 
-
         tabBarStyle: {
           backgroundColor: "white",
           borderTopWidth: 0,
-          height: Platform.OS === "ios" ? 85 : 70,  
-          paddingBottom: Platform.OS === "ios" ? 25 : 10, 
+          height: Platform.OS === "ios" ? 85 : 70,
+          paddingBottom: Platform.OS === "ios" ? 25 : 10,
           paddingTop: 8,
         },
 
@@ -40,8 +37,9 @@ export default function TabNavigator() {
           if (route.name === "Explore")
             iconName = focused ? "grid" : "grid-outline";
 
-          if (route.name === "SearchAI")
-            iconName = focused ? "search" : "search-outline";
+
+          if (route.name === "AIChef")
+            iconName = focused ? "restaurant" : "restaurant-outline";
 
           if (route.name === "Favorites")
             iconName = focused ? "heart" : "heart-outline";
@@ -57,11 +55,14 @@ export default function TabNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Explore" component={ExploreScreen} />
+
+
       <Tab.Screen
-        name="SearchAI"
+        name="AIChef"
         component={IngredientSearchScreen}
-        options={{ title: "AI Search" }}
+        options={{ title: "AI Chef" }}
       />
+
       <Tab.Screen
         name="Favorites"
         component={FavoritesScreen}
