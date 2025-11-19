@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   View,
@@ -17,15 +16,11 @@ export default function FavoritesScreen() {
       id: "1",
       title: "Garlic Butter Pasta",
       time: "20 Min",
-      image:
-        "https://images.unsplash.com/photo-1603133872878-684f5a7f7b53?w=1200&q=80",
     },
     {
       id: "2",
       title: "Chicken Teriyaki",
       time: "25 Min",
-      image:
-        "https://images.unsplash.com/photo-1604908177522-7a8f6c41e7b6?w=1200&q=80",
     },
   ]);
 
@@ -38,17 +33,17 @@ export default function FavoritesScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView
-        style={styles.root}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 60 }}
+        contentContainerStyle={{ paddingBottom: 70 }}
+        style={styles.root}
       >
-        {/* HEADER */}
+
         <Text style={styles.title}>Favorite Recipes</Text>
         <Text style={styles.subtitle}>
           {saved.length} item{saved.length !== 1 ? "s" : ""} bookmarked
         </Text>
 
-        {/* EMPTY STATE */}
+
         {isEmpty && (
           <View style={styles.emptyBox}>
             <Image
@@ -62,30 +57,41 @@ export default function FavoritesScreen() {
           </View>
         )}
 
-        {/* SAVED LIST */}
+
         {!isEmpty && (
           <View style={styles.listWrapper}>
             {saved.map((item) => (
-              <View key={item.id} style={styles.card}>
-                <Image source={{ uri: item.image }} style={styles.image} />
+              <TouchableOpacity key={item.id} activeOpacity={0.85}>
+                <View style={styles.b2Card}>
 
-                <View style={styles.cardContent}>
-                  <Text style={styles.recipeTitle}>{item.title}</Text>
-                  <Text style={styles.recipeTime}>{item.time}</Text>
+                  <View style={styles.foodIconCircle}>
+                    <Ionicons
+                      name="restaurant-outline"
+                      size={22}
+                      color="#e11932"
+                    />
+                  </View>
+
+
+                  <View style={styles.textColumn}>
+                    <Text style={styles.b2Title}>{item.title}</Text>
+                    <Text style={styles.b2Time}>{item.time}</Text>
+                  </View>
+
+
+                  <TouchableOpacity
+                    onPress={() => removeItem(item.id)}
+                    style={styles.deleteWrapper}
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#e11932" />
+                  </TouchableOpacity>
                 </View>
-
-                <TouchableOpacity
-                  onPress={() => removeItem(item.id)}
-                  style={styles.removeBtn}
-                >
-                  <Ionicons name="trash-outline" size={20} color="#e11932" />
-                </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         )}
 
-        {/* RECOMMENDED SECTION */}
+
         <View style={styles.recommendBox}>
           <Text style={styles.recommendTitle}>You may also like</Text>
 
@@ -140,7 +146,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
 
-  // EMPTY STATE UI
+
   emptyBox: {
     marginTop: 60,
     alignItems: "center",
@@ -165,58 +171,62 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
-  // SAVED LIST
+
   listWrapper: {
     marginTop: 10,
   },
 
-  card: {
+  b2Card: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 16,
-    overflow: "hidden",
-    marginBottom: 18,
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    borderRadius: 18,
+    marginBottom: 14,
     borderWidth: 1,
     borderColor: "#eee",
 
     shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
 
-    flexDirection: "row",
+  foodIconCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: 46,
+    backgroundColor: "#ffe6e9",
+    justifyContent: "center",
     alignItems: "center",
+    marginRight: 14,
   },
 
-  image: {
-    width: 90,
-    height: 90,
-  },
-
-  cardContent: {
+  textColumn: {
     flex: 1,
-    paddingHorizontal: 14,
   },
 
-  recipeTitle: {
+  b2Title: {
     fontFamily: "LatoBold",
     fontSize: 16,
     color: "#111",
-    marginBottom: 4,
   },
 
-  recipeTime: {
+  b2Time: {
     fontFamily: "LatoRegular",
+    marginTop: 2,
     fontSize: 13,
     color: "#777",
   },
 
-  removeBtn: {
-    padding: 12,
+  deleteWrapper: {
+    padding: 6,
   },
 
-  // RECOMMEND BOX
+
   recommendBox: {
-    marginTop: 30,
+    marginTop: 32,
   },
   recommendTitle: {
     fontSize: 18,

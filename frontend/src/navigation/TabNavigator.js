@@ -40,7 +40,7 @@ export default function TabNavigator() {
 
 
           if (route.name === "AIChef")
-            iconName = focused ? "restaurant" : "restaurant-outline";
+            iconName = focused ? "sparkles" : "sparkles-outline";
 
           if (route.name === "Favorites")
             iconName = focused ? "heart" : "heart-outline";
