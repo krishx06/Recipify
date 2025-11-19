@@ -7,6 +7,7 @@ import HomeScreen from "../screens/HomeScreen";
 import ExploreScreen from "../screens/ExploreScreen";
 import IngredientSearchScreen from "../screens/AIChefScreen";
 import FavoritesScreen from "../screens/FavoritesScreen";
+import AiChefScreen from "../screens/AIChefScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -59,14 +60,14 @@ export default function TabNavigator() {
 
       <Tab.Screen
         name="AIChef"
-        component={IngredientSearchScreen}
+        component={AiChefScreen}
         options={{ title: "AI Chef" }}
       />
 
       <Tab.Screen
         name="Favorites"
         component={FavoritesScreen}
-        options={{ title: "Saved" }}
+        options={{ title: "Favorites" }}
       />
     </Tab.Navigator>
   );
