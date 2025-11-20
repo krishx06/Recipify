@@ -1,3 +1,4 @@
+
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
@@ -5,9 +6,8 @@ import { Platform } from "react-native";
 
 import HomeScreen from "../screens/HomeScreen";
 import ExploreScreen from "../screens/ExploreScreen";
-import IngredientSearchScreen from "../screens/AIChefScreen";
 import FavoritesScreen from "../screens/FavoritesScreen";
-import AiChefScreen from "../screens/AIChefScreen";
+import AIChefScreen from "../screens/AIChefScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -38,7 +38,6 @@ export default function TabNavigator() {
           if (route.name === "Explore")
             iconName = focused ? "grid" : "grid-outline";
 
-
           if (route.name === "AIChef")
             iconName = focused ? "sparkles" : "sparkles-outline";
 
@@ -56,19 +55,8 @@ export default function TabNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Explore" component={ExploreScreen} />
-
-
-      <Tab.Screen
-        name="AIChef"
-        component={AiChefScreen}
-        options={{ title: "AI Chef" }}
-      />
-
-      <Tab.Screen
-        name="Favorites"
-        component={FavoritesScreen}
-        options={{ title: "Favorites" }}
-      />
+      <Tab.Screen name="AIChef" component={AIChefScreen} />
+      <Tab.Screen name="Favorites" component={FavoritesScreen} />
     </Tab.Navigator>
   );
 }

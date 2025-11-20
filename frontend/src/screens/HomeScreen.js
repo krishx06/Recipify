@@ -1,5 +1,4 @@
-
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -22,6 +21,21 @@ export default function HomeScreen({ navigation }) {
     logout: () => {},
   };
 
+
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+
+  function spinAndPick() {
+    const randomRecipe = {
+      id: "spin1",
+      title: "Pasta",
+      time: "20 Min",
+      category: "Featured Dish",
+      image:
+        "https://images.unsplash.com/photo-1603133872878-684f5a7f7b53?w=1200&q=80",
+    };
+    setSelectedRecipe(randomRecipe);
+  }
+
   return (
     <ScrollView
       style={styles.container}
@@ -30,7 +44,6 @@ export default function HomeScreen({ navigation }) {
     >
 
       <View style={styles.header}>
-
         <View style={styles.avatarContainer}>
           {user?.avatar ? (
             <Image source={{ uri: user.avatar }} style={styles.avatar} />
@@ -43,14 +56,12 @@ export default function HomeScreen({ navigation }) {
           )}
         </View>
 
-
         <View style={{ flex: 1 }}>
           <Text style={styles.welcome}>
             Welcome {user?.name?.split(" ")[0] || "Friend"}
           </Text>
           <Text style={styles.subtext}>What do you want to cook today?</Text>
         </View>
-
 
         <TouchableOpacity onPress={logout} style={styles.logoutButton}>
           <Text style={styles.logoutText}>Logout</Text>
@@ -61,11 +72,14 @@ export default function HomeScreen({ navigation }) {
       <FeatureCards navigation={navigation} />
 
 
-      <RandomRecipeCard />
+      <RandomRecipeCard
+        selected={selectedRecipe}
+        spinAndPick={spinAndPick}
+        navigation={navigation}
+      />
 
 
-      <PopularSection />
-
+      <PopularSection navigation={navigation} />
 
       <RecipifyFooter />
     </ScrollView>
@@ -135,10 +149,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
   },
+
   logoutText: {
     color: "#e11932",
     fontFamily: "LatoBold",
     fontSize: 14,
   },
 });
-

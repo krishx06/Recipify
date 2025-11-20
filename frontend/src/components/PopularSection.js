@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 
 const POPULAR = [
   {
@@ -32,13 +38,22 @@ const POPULAR = [
   },
 ];
 
-export default function PopularSection() {
+export default function PopularSection({ navigation }) {
+  function openRecipe(item) {
+    navigation.navigate("RecipeDetails", { recipe: item });
+  }
+
   return (
     <View style={{ marginTop: 30 }}>
       <Text style={styles.heading}>Popular</Text>
 
       {POPULAR.map((item) => (
-        <View key={item.id} style={styles.shadowWrapper}>
+        <TouchableOpacity
+          key={item.id}
+          style={styles.shadowWrapper}
+          activeOpacity={0.85}
+          onPress={() => openRecipe(item)}
+        >
           <View style={styles.card}>
             <Image source={{ uri: item.image }} style={styles.image} />
 
@@ -47,7 +62,7 @@ export default function PopularSection() {
               <Text style={styles.time}>{item.time}</Text>
             </View>
           </View>
-        </View>
+        </TouchableOpacity>
       ))}
     </View>
   );
@@ -59,46 +74,18 @@ const styles = StyleSheet.create({
     fontFamily: "TransformaSemiBold",
     marginBottom: 18,
   },
-
-  /** SHADOW FIX */
   shadowWrapper: {
     shadowColor: "#000",
     shadowOpacity: 0.15,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
-    elevation: 4, // Android
+    elevation: 4,
     borderRadius: 18,
     marginBottom: 18,
-    backgroundColor: "transparent",
   },
-
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    overflow: "hidden", // keeps card clean but shadow still works due to wrapper
-  },
-
-  image: {
-    width: "100%",
-    height: 150,
-    resizeMode: "cover",
-  },
-
-  textWrap: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-  },
-
-  title: {
-    fontFamily: "LatoBold",
-    fontSize: 18,
-    color: "#111",
-    marginBottom: 4,
-  },
-
-  time: {
-    fontFamily: "LatoRegular",
-    color: "#666",
-    fontSize: 13,
-  },
+  card: { backgroundColor: "#fff", borderRadius: 18, overflow: "hidden" },
+  image: { width: "100%", height: 150, resizeMode: "cover" },
+  textWrap: { paddingVertical: 14, paddingHorizontal: 16 },
+  title: { fontFamily: "LatoBold", fontSize: 18, color: "#111" },
+  time: { fontFamily: "LatoRegular", color: "#666", fontSize: 13 },
 });

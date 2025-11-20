@@ -2,14 +2,9 @@
 import React from "react";
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
 
-import WelcomeScreen from "./src/screens/WelcomeScreen";
-import LoginScreen from "./src/screens/LoginScreen";
-import TabNavigator from "./src/navigation/TabNavigator";
-
-const Stack = createNativeStackNavigator();
+import RootNavigator from "./src/navigation/RootNavigator";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -26,15 +21,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-
-        <Stack.Screen name="MainTabs" component={TabNavigator} />
-
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-
-      </Stack.Navigator>
-
+      <RootNavigator />
       <StatusBar style="auto" />
     </NavigationContainer>
   );
