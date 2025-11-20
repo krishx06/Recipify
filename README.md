@@ -1,5 +1,5 @@
 ## 1. Project Title  
-**Recipify - AI Powered Recipe Finder & Meal Suggestion App**
+**Recipify - AI Powered modern recipe discovery app that helps users cook smarter — with AI-generated recipes, personalized suggestions, and seamless Google login.**
 
 ## 2. Your Name & Roll Number  
 Krish Patil – 2024-B-11102006C
@@ -8,55 +8,58 @@ Krish Patil – 2024-B-11102006C
 Many people in India struggle with deciding what to cook based on the ingredients they have. Existing recipe apps often focus on Western cuisines, fail to understand local ingredient names in Hindi/regional languages, and don’t offer an AI-based personalized experience.  
 
 ## 4. Proposed Solution / Idea  
-This project aims to make cooking easier and more exciting for Indian households by suggesting dishes popular in India (Indian or Indo-fusion cuisine) with clear step-by-step instructions, videos, and ingredient translations.
-I will build an application that allows users to:  
-- Enter available ingredients (in English or Hindi)  
-- Get AI-generated suggestions for dishes that can be prepared using those ingredients  
-- Provide clear step-by-step recipes and embedded video tutorials  
-- Offer random recipe exploration for users who want to try new dishes without ingredient restrictions  
-- Include authentication for personalized recommendations and saved favorite recipes
+Recipify solves this by using AI and real-time recipe APIs to help users quickly discover meals based on their inputs and preferences.
+The app allows users to:
+- Enter available ingredients to get recipe suggestions
+- Get AI-generated recipes using Google Gemini
+- Explore recipes even without entering ingredients
+- Filter recipes by cuisines (Italian, Indian, Mexican, Chinese, American, etc.)
+- Save favorite recipes
+- Log in securely using Supabase Google OAuth
 
 ## 5. Key Features  
-- **Ingredient-based recipe suggestions** (supports English & Hindi names for spices/ingredients)  
-- **AI-powered personalized recommendations** based on cooking history and preferences  
-- **Step-by-step instructions** + embedded video tutorials  
-- **Random recipe exploration mode** for inspiration  
-- **Secure user authentication** and profile system  
-- **Favorites & Recently Cooked section** stored in user account
+- **Ingredient-based recipe suggestions** (supports English & Hindi names for ingredients)  
+- **AI-powered recipe generator** (Gemini)
+- **Cuisine filters:** Indian, Italian, Mexican, Chinese, American & more
+- **Exploration mode** for discovering new recipes
+- **Random recipe picker** for instant inspiration
+- **Step-by-step instructions**
+- **Google Sign-in using Supabase Auth**
+- **Favorites section stored in user profile**
 
 ## 6. Target Users / Audience  
-- Indian households and students living in hostels/PGs  
+- Indian households
+- Students living in hostels/PGs  
 - Amateur and experienced home cooks  
-- Food enthusiasts exploring Indo-fusion recipes
+- Food enthusiasts exploring Global cuisines
 
 ## 7. Technology Stack  
-- **Frontend:** React.js (Web), React Native (Mobile)  
-- **Backend:** Node.js + Express.js  
-- **Database:** MongoDB / PostgreSQL  
-- **AI/NLP:** OpenAI API / HuggingFace models for recipe matching & suggestions  
-- **Translation:** Google Translate API or custom Hindi-English ingredient mapping  
-- **Authentication:** Firebase Auth / JWT-based authentication
+- **Frontend:** React Native (Expo), React Navigation, Supabase Auth (Google OAuth)
+- **Backend:** Node.js, Express.js, MongoDB (Mongoose),
+- **APIs:** Spoonacular API, Edamam API, Gemini AI API
 
 ## 8. Expected Outcome  
-A fully functional mobile & web app that:  
-- Accurately understands both Hindi and English ingredient inputs  
-- Suggests relevant, popular-in-India recipes  
-- Displays cooking steps with clear instructions and video tutorials  
-- Learns user preferences to improve suggestions over time
+A fully functional mobile app that:  
+- Understands both Hindi and English ingredient inputs  
+- Suggests relevant recipes instantly
+- Generates recipes using AI
+- Discovers Global cuisines
+- Saves user preferences securely
+- Provides a clean, intuitive recipe discovery experience
 
 ## 9. Timeline (8 Weeks)  
 - **Week 1:** Research & UI/UX design  
-- **Week 2:** Ingredient mapping (Hindi–English) & AI model selection  
-- **Week 3:** Backend setup & database integration  
-- **Week 4:** Ingredient-based recipe suggestion API  
-- **Week 5:** Recipe details + video integration  
-- **Week 6:** Authentication system & profile features  
-- **Week 7:** AI personalization & random recipe mode  
+- **Week 2:** Backend setup & database integration 
+- **Week 3:** Authentication system & profile features  
+- **Week 4:** Cuisine filters + explore
+- **Week 5:** Favorites + user data
+- **Week 6:** Ingredient-based recipe engine
+- **Week 7:** AI recipe generator
 - **Week 8:** Testing, bug fixes & deployment
 
 ## 10. Additional Notes  
-- The recipe database will focus on dishes *popular in India*, including Indian regional cuisines and Indo-fusion (like Indo-Chinese, pasta, etc.).  
-- Ingredient name mapping will be critical for matching Hindi inputs to database terms.  
+- The app uses global cuisine filters. 
+- Saved recipes are synced to MongoDB through backend APIs.
 - AI suggestions will improve over time using user history and preference learning.
 
 ---
