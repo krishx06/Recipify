@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -7,51 +7,13 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../context/AuthContext";
 
-import * as WebBrowser from "expo-web-browser";
-import * as Google from "expo-auth-session/providers/google";
-import googleConfig from "../config/googleConfig";
-
-WebBrowser.maybeCompleteAuthSession();
-
-export default function LoginScreen({ navigation }) {
-  const [loading, setLoading] = useState(false);
-
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    iosClientId: googleConfig.iosClientId,
-    androidClientId: googleConfig.androidClientId,
-    webClientId: googleConfig.webClientId,
-  });
-
-  useEffect(() => {
-    if (response?.type === "success") {
-      const { authentication } = response;
-      fetchGoogleUser(authentication.accessToken);
-    }
-  }, [response]);
-
-  async function fetchGoogleUser(token) {
-    setLoading(true);
-
-    try {
-      const res = await fetch(
-        "https://www.googleapis.com/oauth2/v1/userinfo?alt=json",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const userInfo = await res.json();
-
-      navigation.replace("MainTabs", { user: userInfo });
-    } catch (err) {
-      alert("Login failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
+export default function LoginScreen() {
+  const { signInWithGoogle, loading } = useAuth();
 
   return (
     <View style={styles.container}>
-
 
       <Text style={styles.brand}>Recipify.</Text>
 
@@ -66,8 +28,8 @@ export default function LoginScreen({ navigation }) {
 
       <TouchableOpacity
         style={styles.googleButton}
-        onPress={() => promptAsync()}
-        disabled={!request || loading}
+        onPress={signInWithGoogle}
+        disabled={loading}
       >
         {loading ? (
           <ActivityIndicator color="#fff" />
@@ -78,6 +40,7 @@ export default function LoginScreen({ navigation }) {
           </>
         )}
       </TouchableOpacity>
+
 
       <Text style={styles.footerText}>
         By continuing, you agree to our Terms & Privacy Policy.
@@ -130,7 +93,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 14,
     gap: 10,
-    marginBottom: 0,
   },
 
   googleText: {

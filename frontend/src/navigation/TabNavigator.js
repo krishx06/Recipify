@@ -1,4 +1,3 @@
-
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
@@ -29,7 +28,7 @@ export default function TabNavigator() {
         tabBarActiveTintColor: "#e11932",
         tabBarInactiveTintColor: "#000",
 
-        tabBarIcon: ({ color, size, focused }) => {
+        tabBarIcon: ({ color, focused }) => {
           let iconName = "home-outline";
 
           if (route.name === "Home")

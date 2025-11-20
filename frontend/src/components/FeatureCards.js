@@ -23,7 +23,7 @@ export default function FeatureCards({ navigation }) {
 
       <TouchableOpacity
         style={styles.card}
-        onPress={() => navigation.navigate("SearchAI")}   
+        onPress={() => navigation.navigate("AIChef")}   
       >
         <View>
           <Text style={styles.title}>Search by Ingredients</Text>

@@ -33,6 +33,8 @@
       "favicon": "./assets/images/icon.png"
     },
     "extra": {
+      "supabaseUrl": "https://awtpoxrqbsmpdbptvdda.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3dHBveHJxYnNtcGRicHR2ZGRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTY5NTAsImV4cCI6MjA3OTEzMjk1MH0.XEsGst1biQxl84Hgi35542WlhQsQOjRaFFLOG2KCSAA",
       "eas": {
         "projectId": "dada7f95-9962-445d-a79a-5d7ffdf024a2"
       }
