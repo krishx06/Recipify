@@ -1,40 +1,48 @@
-import React, { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
   StyleSheet,
-  FlatList,
   Image,
   TouchableOpacity,
+  FlatList,
   ScrollView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
-
+// ---------- MEALDB SUPPORTED FILTERS ----------
 const CUISINES = [
-  { icon: "flame", label: "Indian" },
-  { icon: "pizza", label: "Italian" },
-  { icon: "restaurant", label: "Thai" },
-  { icon: "leaf", label: "Chinese" },
   { icon: "fast-food", label: "American" },
-  { icon: "fish", label: "Japanese" },
-  { icon: "bonfire", label: "Korean" },
-  { icon: "nutrition", label: "Mediterranean" },
-  { icon: "wine", label: "French" },
-  { icon: "cafe", label: "Spanish" },
-  { icon: "cloud", label: "Middle Eastern" },
-  { icon: "rainy", label: "Vietnamese" },
-  { icon: "ice-cream", label: "Greek" },
-  { icon: "sunny", label: "African" },
   { icon: "egg", label: "British" },
+  { icon: "cafe", label: "Canadian" },
+  { icon: "leaf", label: "Chinese" },
+  { icon: "restaurant", label: "Dutch" },
+  { icon: "nutrition", label: "Egyptian" },
+  { icon: "wine", label: "French" },
+  { icon: "ice-cream", label: "Greek" },
+  { icon: "flame", label: "Indian" },
+  { icon: "fish", label: "Irish" },
+  { icon: "pizza", label: "Italian" },
+  { icon: "fish", label: "Jamaican" },
+  { icon: "fish", label: "Japanese" },
+  { icon: "flame", label: "Kenyan" },
+  { icon: "restaurant", label: "Malaysian" },
+  { icon: "sunny", label: "Mexican" },
+  { icon: "nutrition", label: "Moroccan" },
+  { icon: "restaurant", label: "Russian" },
+  { icon: "cafe", label: "Spanish" },
+  { icon: "flame", label: "Thai" },
+  { icon: "cloud", label: "Tunisian" },
+  { icon: "restaurant", label: "Turkish" },
+  { icon: "rainy", label: "Vietnamese" },
 ];
 
-
+// ---------- TRENDING (TEMP) ----------
 const TRENDING = [
   {
-    id: "1",
+    idMeal: "1",
     title: "Garlic Butter Pasta",
     time: "20 Min",
     cuisine: "Italian",
@@ -42,7 +50,7 @@ const TRENDING = [
       "https://images.unsplash.com/photo-1603133872878-684f5a7f7b53?w=1200&q=80",
   },
   {
-    id: "2",
+    idMeal: "2",
     title: "Chicken Teriyaki",
     time: "25 Min",
     cuisine: "Japanese",
@@ -51,188 +59,215 @@ const TRENDING = [
   },
 ];
 
-const ALL_RECIPES = [
-  ...TRENDING,
-  {
-    id: "3",
-    title: "Veggie Stir Fry",
-    time: "30 Min",
-    cuisine: "Chinese",
-    image:
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80",
-  },
-  {
-    id: "4",
-    title: "Avocado Toast",
-    time: "10 Min",
-    cuisine: "American",
-    image:
-      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&q=80",
-  },
-];
-
-export default function ExploreScreen() {
+export default function ExploreScreen({ navigation }) {
   const [activeCuisine, setActiveCuisine] = useState("All");
+  const [recipes, setRecipes] = useState([]);
 
-  const filteredRecipes =
-    activeCuisine === "All"
-      ? ALL_RECIPES
-      : ALL_RECIPES.filter((r) => r.cuisine === activeCuisine);
+  useEffect(() => {
+    fetchRecipes();
+  }, [activeCuisine]);
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        
+  async function fetchRecipes() {
+    try {
+      if (activeCuisine === "All") {
+        let randomMeals = [];
+        for (let i = 0; i < 8; i++) {
+          const res = await fetch("https://www.themealdb.com/api/json/v1/1/random.php");
+          const data = await res.json();
+          if (data.meals?.[0]) randomMeals.push(data.meals[0]);
+        }
+        setRecipes(randomMeals);
+        return;
+      }
 
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#777" />
-          <TextInput
-            placeholder="Search recipes, cuisines, ingredients..."
-            placeholderTextColor="#999"
-            style={styles.input}
+      const res = await fetch(
+        `https://www.themealdb.com/api/json/v1/1/filter.php?a=${activeCuisine}`
+      );
+      const data = await res.json();
+      setRecipes(data?.meals?.slice(0, 12) || []);
+    } catch (err) {
+      console.log("Cuisine fetch error:", err);
+    }
+  }
+
+  async function handleOpenRecipe(id) {
+    try {
+      const res = await fetch(
+        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`
+      );
+      const data = await res.json();
+      if (!data.meals) return;
+
+      const meal = data.meals[0];
+
+      const ingredients = [];
+      for (let i = 1; i <= 20; i++) {
+        const ing = meal[`strIngredient${i}`];
+        const measure = meal[`strMeasure${i}`];
+        if (ing && ing.trim()) ingredients.push(`${ing} - ${measure}`);
+      }
+
+      const recipe = {
+        id: meal.idMeal,
+        title: meal.strMeal,
+        image: meal.strMealThumb,
+        instructions: meal.strInstructions
+          ? meal.strInstructions.split(/\r?\n/).filter(Boolean)
+          : [],
+        ingredients,
+        cuisine: meal.strArea,
+        category: meal.strCategory,
+        time: "25 Min",
+        serves: 2,
+        difficulty: "Medium",
+      };
+
+      navigation.navigate("RecipeDetails", { recipe });
+    } catch (err) {
+      console.log("Meal detail fetch error:", err);
+    }
+  }
+
+  // ---------------- HEADER CONTENT FOR FLATLIST ----------------
+  const ListHeader = () => (
+    <View>
+      {/* SEARCH */}
+      <View style={styles.searchBar}>
+        <Ionicons name="search" size={20} color="#777" />
+        <TextInput
+          placeholder="Search recipes, cuisines, ingredients..."
+          placeholderTextColor="#999"
+          style={styles.input}
+        />
+      </View>
+
+      {/* CUISINES */}
+      <Text style={styles.sectionTitle}>Popular Cuisines</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <TouchableOpacity
+          style={[styles.chip, activeCuisine === "All" && styles.activeChip]}
+          onPress={() => setActiveCuisine("All")}
+        >
+          <Ionicons
+            name="grid"
+            size={16}
+            color={activeCuisine === "All" ? "#fff" : "#e11932"}
           />
-        </View>
+          <Text
+            style={[
+              styles.chipText,
+              activeCuisine === "All" && styles.activeChipText,
+            ]}
+          >
+            All
+          </Text>
+        </TouchableOpacity>
 
-
-        <View style={styles.categoryWrapper}>
-          <Text style={styles.sectionTitle}>Popular Cuisines</Text>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            
-
+        {CUISINES.map((item, i) => {
+          const isActive = activeCuisine === item.label;
+          return (
             <TouchableOpacity
-              style={[
-                styles.chip,
-                activeCuisine === "All" && styles.activeChip,
-              ]}
-              onPress={() => setActiveCuisine("All")}
+              key={i}
+              style={[styles.chip, isActive && styles.activeChip]}
+              onPress={() => setActiveCuisine(isActive ? "All" : item.label)}
             >
               <Ionicons
-                name="grid"
+                name={item.icon}
                 size={16}
-                color={activeCuisine === "All" ? "#fff" : "#e11932"}
+                color={isActive ? "#fff" : "#e11932"}
               />
-              <Text
-                style={[
-                  styles.chipText,
-                  activeCuisine === "All" && styles.activeChipText,
-                ]}
-              >
-                All
+              <Text style={[styles.chipText, isActive && styles.activeChipText]}>
+                {item.label}
               </Text>
             </TouchableOpacity>
-
-            {CUISINES.map((item, index) => {
-              const isActive = activeCuisine === item.label;
-
-              return (
-                <TouchableOpacity
-                  key={index}
-                  style={[styles.chip, isActive && styles.activeChip]}
-                  onPress={() =>
-                    setActiveCuisine(isActive ? "All" : item.label)
-                  }
-                >
-                  <Ionicons
-                    name={item.icon}
-                    size={16}
-                    color={isActive ? "#fff" : "#e11932"}
-                  />
-                  <Text
-                    style={[
-                      styles.chipText,
-                      isActive && styles.activeChipText,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </View>
-
-
-        <Text style={styles.heading}>Trending</Text>
-
-        <FlatList
-          horizontal
-          data={TRENDING}
-          keyExtractor={(item) => item.id}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <View style={styles.recipeCard}>
-              <Image source={{ uri: item.image }} style={styles.recipeImg} />
-              <Text style={styles.recipeTitle}>{item.title}</Text>
-              <Text style={styles.recipeTime}>{item.time}</Text>
-            </View>
-          )}
-        />
-
-
-        <Text style={styles.heading}>
-          {activeCuisine === "All" ? "All Recipes" : activeCuisine + " Recipes"}
-        </Text>
-
-        <View style={styles.gridWrapper}>
-          {filteredRecipes.map((item) => (
-            <View key={item.id} style={styles.gridCard}>
-              <Image source={{ uri: item.image }} style={styles.gridImg} />
-              <Text style={styles.recipeTitle}>{item.title}</Text>
-              <Text style={styles.recipeTime}>{item.time}</Text>
-            </View>
-          ))}
-        </View>
-
+          );
+        })}
       </ScrollView>
+
+      {/* TRENDING */}
+      <Text style={styles.heading}>Trending</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        {TRENDING.map((item) => (
+          <TouchableOpacity
+            key={item.idMeal}
+            onPress={() => handleOpenRecipe(item.idMeal)}
+            style={styles.trendingCard}
+          >
+            <Image source={{ uri: item.image }} style={styles.trendingImg} />
+            <Text style={styles.trendingTitle}>{item.title}</Text>
+            <Text style={styles.trendingSubtitle}>{item.time}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      <Text style={styles.heading}>
+        {activeCuisine === "All" ? "All Recipes" : `${activeCuisine} Recipes`}
+      </Text>
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }} edges={["top", "left", "right"]}>
+      <FlatList
+        data={recipes}
+        keyExtractor={(item) => item.idMeal}
+        numColumns={2}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={<ListHeader />}
+        columnWrapperStyle={{ justifyContent: "space-between" }}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => handleOpenRecipe(item.idMeal)}
+          >
+            <Image source={{ uri: item.strMealThumb }} style={styles.gridImg} />
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle} numberOfLines={2}>
+                {item.strMeal}
+              </Text>
+
+              <View style={styles.metaRow}>
+                <Ionicons name="time-outline" size={14} color="#888" />
+                <Text style={styles.metaText}>25 Min</Text>
+
+                <Ionicons
+                  name="globe-outline"
+                  size={14}
+                  color="#888"
+                  style={{ marginLeft: 10 }}
+                />
+                <Text style={styles.metaText}>
+                  {activeCuisine === "All" ? "Mixed" : activeCuisine}
+                </Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
+        contentContainerStyle={{ padding: 20, paddingBottom: 20 }}
+      />
     </SafeAreaView>
   );
 }
 
+// ---------------- STYLES -----------------
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    backgroundColor: "#fff",
-  },
-
-  heading: {
-    fontSize: 21,
-    fontFamily: "TransformaSemiBold",
-    marginTop: 20,
-    marginBottom: 10,
-    color: "#111",
-  },
-
-
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#f3f3f3",
-    paddingVertical: 12,
+    paddingVertical: 13,
     paddingHorizontal: 14,
     borderRadius: 16,
     marginBottom: 12,
   },
-
-  input: {
-    marginLeft: 10,
-    fontSize: 14,
-    flex: 1,
-    fontFamily: "LatoRegular",
-  },
-
+  input: { marginLeft: 10, flex: 1, fontSize: 15, fontFamily: "LatoRegular" },
 
   sectionTitle: {
     fontSize: 20,
     fontFamily: "TransformaSemiBold",
     marginBottom: 10,
     color: "#111",
-  },
-
-  categoryWrapper: {
-    marginTop: 16,
   },
 
   chip: {
@@ -246,75 +281,61 @@ const styles = StyleSheet.create({
     marginRight: 10,
     backgroundColor: "#fff",
   },
+  chipText: { marginLeft: 6, fontSize: 14, fontFamily: "LatoRegular" },
+  activeChip: { backgroundColor: "#e11932", borderColor: "#e11932" },
+  activeChipText: { color: "#fff" },
 
-  chipText: {
-    fontSize: 14,
-    fontFamily: "LatoRegular",
-    color: "#333",
-    marginLeft: 6,
-  },
-
-
-  activeChip: {
-    backgroundColor: "#e11932",
-    borderColor: "#e11932",
-  },
-
-  activeChipText: {
-    color: "#fff",
-  },
-
-
-  recipeCard: {
-    width: 180,
-    marginRight: 14,
-    borderRadius: 16,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#eee",
-    backgroundColor: "#fff",
-  },
-
-  recipeImg: {
-    width: "100%",
-    height: 110,
-  },
-
-  recipeTitle: {
-    fontFamily: "LatoBold",
-    fontSize: 16,
-    marginTop: 8,
-    paddingHorizontal: 10,
+  heading: {
+    fontSize: 22,
+    fontFamily: "TransformaSemiBold",
+    marginTop: 20,
+    marginBottom: 10,
     color: "#111",
   },
 
-  recipeTime: {
-    fontFamily: "LatoRegular",
-    fontSize: 13,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    color: "#777",
+  trendingCard: { width: 180, marginRight: 14 },
+  trendingImg: { width: "100%", height: 120, borderRadius: 16 },
+  trendingTitle: {
+    fontFamily: "LatoBold",
+    fontSize: 16,
+    marginTop: 8,
+    color: "#111",
   },
-
-  gridWrapper: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginBottom: 60,
+  trendingSubtitle: {
+    fontFamily: "LatoRegular",
+    fontSize: 14,
+    color: "#777",
   },
 
   gridCard: {
     width: "48%",
     borderRadius: 16,
-    overflow: "hidden",
     backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#eee",
-    marginBottom: 16,
+    overflow: "hidden",
+    marginBottom: 18,
+    elevation: 2,
+    borderColor: "#80000056",
+    borderWidth: 0.5,
   },
 
-  gridImg: {
-    width: "100%",
-    height: 120,
+  gridImg: { width: "100%", height: 150 },
+
+  cardContent: { padding: 10 },
+  cardTitle: {
+    fontSize: 15,
+    fontFamily: "LatoBold",
+    lineHeight: 20,
+    color: "#111",
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+  },
+  metaText: {
+    fontSize: 12,
+    fontFamily: "LatoRegular",
+    color: "#666",
+    marginLeft: 4,
   },
 });
