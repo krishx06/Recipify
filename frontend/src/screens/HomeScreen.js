@@ -7,7 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
-  Alert
+  Alert,
 } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
@@ -27,41 +27,68 @@ export default function HomeScreen({ navigation }) {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
 
   function handleLogout() {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to Signout?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Signout",
-          style: "destructive",
-          onPress: () => signOut(),
-        },
-      ]
-    );
+    Alert.alert("Logout", "Are you sure you want to Signout?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Signout", style: "destructive", onPress: () => signOut() },
+    ]);
   }
-  function spinAndPick() {
-    const randomRecipe = {
-      id: "spin1",
-      title: "Pasta",
-      time: "20 Min",
-      category: "Featured Dish",
-      image:
-        "https://images.unsplash.com/photo-1603133872878-684f5a7f7b53?w=1200&q=80",
-    };
-    setSelectedRecipe(randomRecipe);
+
+  function extractIngredients(item) {
+    const list = [];
+    for (let i = 1; i <= 20; i++) {
+      const ing = item[`strIngredient${i}`];
+      const measure = item[`strMeasure${i}`];
+
+      if (ing && ing.trim() !== "") {
+        list.push(`${measure} ${ing}`.trim());
+      }
+    }
+    return list;
+  }
+
+  async function spinAndPick() {
+    try {
+      const res = await fetch("https://www.themealdb.com/api/json/v1/1/random.php");
+      const data = await res.json();
+
+      if (data.meals && data.meals[0]) {
+        const item = data.meals[0];
+
+        const recipe = {
+          id: item.idMeal,
+          title: item.strMeal,
+          image: item.strMealThumb,
+          ingredients: extractIngredients(item),
+          instructions:
+            item.strInstructions
+              ?.split(/\r?\n+/)
+              .map(line =>
+                line
+                  .replace(/<[^>]*>/g, "")
+                  .replace(/\u200B/g, "")
+                  .replace(/\t+/g, "")
+                  .replace(/\s+/g, " ")
+                  .trim()
+              )
+              .filter(line => line.length > 0 && line !== "." && line !== "-") || [],
+          time: "N/A",
+          serves: item.strServings || "N/A",
+          difficulty: "N/A",
+          cuisine: item.strArea || "N/A",
+        };
+
+        setSelectedRecipe(recipe);
+      }
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Error", "Could not fetch recipe.");
+    }
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: 80 }}
-      showsVerticalScrollIndicator={false}
-    >
-
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      
+      {/* 🔥 Sticky Header */}
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
           {user.avatar ? (
@@ -81,37 +108,50 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <Text style={styles.logoutText}>Signout</Text>
+          <Text style={styles.logoutText}>Signout</Text>
         </TouchableOpacity>
       </View>
 
+      {/* 🔥 Scrollable Body */}
+      <ScrollView
+        style={styles.scrollBody}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 80 }}
+      >
+        <FeatureCards navigation={navigation} />
 
-      <FeatureCards navigation={navigation} />
-      <RandomRecipeCard
-        selected={selectedRecipe}
-        spinAndPick={spinAndPick}
-        navigation={navigation}
-      />
-      <PopularSection navigation={navigation} />
-      <RecipifyFooter />
-    </ScrollView>
+        <RandomRecipeCard
+          selected={selectedRecipe}
+          spinAndPick={spinAndPick}
+          navigation={navigation}
+        />
+
+        <PopularSection navigation={navigation} />
+
+        <RecipifyFooter />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  scrollBody: {
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? 40 : 60,
-    backgroundColor: "#fff",
+    paddingTop: 10,
   },
+
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 22,
-    marginTop: 10,
-    gap: 12,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "android" ? 40 : 60,
+    paddingBottom: 15,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+    zIndex: 10,
   },
+
   avatarContainer: {
     width: 64,
     height: 64,
@@ -120,11 +160,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#eee",
     justifyContent: "center",
     alignItems: "center",
+    marginRight: 12,
   },
-  avatar: {
-    width: "100%",
-    height: "100%",
-  },
+
+  avatar: { width: "100%", height: "100%" },
+
   placeholderAvatar: {
     width: "100%",
     height: "100%",
@@ -133,26 +173,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  initial: {
-    fontFamily: "TransformaSemiBold",
-    fontSize: 22,
-    color: "#444",
-  },
-  welcome: {
-    fontSize: 22,
-    fontFamily: "TransformaSemiBold",
-    color: "#e11932",
-  },
+
+  initial: { fontFamily: "TransformaSemiBold", fontSize: 22, color: "#444" },
+
+  welcome: { fontSize: 22, fontFamily: "TransformaSemiBold", color: "#e11932" },
+
   subtext: {
     fontSize: 14,
     fontFamily: "LatoRegular",
     color: "#212121",
     marginTop: 2,
   },
-  logoutButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
+
+  logoutButton: { paddingVertical: 6, paddingHorizontal: 12 },
+
   logoutText: {
     color: "#e11932",
     fontFamily: "LatoBold",
