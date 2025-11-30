@@ -6,11 +6,11 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Share,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RECIPE_DETAILS } from "../data/recipeDetails";
-
 
 export default function RecipeDetailsScreen({ navigation, route }) {
   const recipe = route?.params?.recipe;
@@ -31,8 +31,48 @@ export default function RecipeDetailsScreen({ navigation, route }) {
   const ingredients = manual?.ingredients || recipe.ingredients;
   const instructions = manual?.instructions || recipe.instructions;
 
+  async function shareRecipe() {
+    try {
+      await Share.share({
+        message: `Check out this recipe: ${recipe.title}`,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   return (
     <View style={styles.container}>
+
+      {/* ⭐ FLOATING SAFE-AREA TOP BUTTONS ⭐ */}
+      <SafeAreaView style={[styles.safeTop, { position: "absolute", top: 0, zIndex: 20 }]}>
+        <View style={styles.topButtons}>
+
+          {/* BACK BUTTON */}
+          <TouchableOpacity style={styles.roundBtn} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={22} color="#e11932" />
+          </TouchableOpacity>
+
+          {/* RIGHT BUTTONS */}
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            {/* SHARE */}
+            <TouchableOpacity style={styles.roundBtn} onPress={shareRecipe}>
+              <Ionicons name="share-outline" size={22} color="#e11932" />
+            </TouchableOpacity>
+
+            {/* SAVE */}
+            <TouchableOpacity style={styles.roundBtn} onPress={() => setSaved(!saved)}>
+              <Ionicons
+                name={saved ? "bookmark" : "bookmark-outline"}
+                size={22}
+                color="#e11932"
+              />
+            </TouchableOpacity>
+          </View>
+
+        </View>
+      </SafeAreaView>
+
       <ScrollView showsVerticalScrollIndicator={false}>
         
         {/* IMAGE */}
@@ -53,19 +93,26 @@ export default function RecipeDetailsScreen({ navigation, route }) {
 
         {/* TABS */}
         <View style={styles.tabsRow}>
-          <TabButton label="Ingredients" active={activeTab === "ingredients"} onPress={() => setActiveTab("ingredients")} />
-          <TabButton label="Instructions" active={activeTab === "instructions"} onPress={() => setActiveTab("instructions")} />
+          <TabButton
+            label="Ingredients"
+            active={activeTab === "ingredients"}
+            onPress={() => setActiveTab("ingredients")}
+          />
+          <TabButton
+            label="Instructions"
+            active={activeTab === "instructions"}
+            onPress={() => setActiveTab("instructions")}
+          />
         </View>
 
         {/* CONTENT */}
         <View style={{ marginTop: 15, paddingBottom: 40 }}>
-  {activeTab === "ingredients" ? (
-    <IngredientsList items={ingredients || []} />
-  ) : (
-    <InstructionsList items={instructions || []} />
-  )}
-</View>
-
+          {activeTab === "ingredients" ? (
+            <IngredientsList items={ingredients || []} />
+          ) : (
+            <InstructionsList items={instructions || []} />
+          )}
+        </View>
 
       </ScrollView>
     </View>
@@ -113,13 +160,12 @@ const InstructionsList = ({ items }) => {
         if (typeof rawStep !== "string") return null;
 
         const step = rawStep
-          .replace(/<[^>]*>/g, "")   // remove HTML
-          .replace(/\u200B/g, "")    // zero-width
-          .replace(/\t+/g, "")       // tabs
-          .replace(/\s+/g, " ")      // extra spaces
+          .replace(/<[^>]*>/g, "")
+          .replace(/\u200B/g, "")
+          .replace(/\t+/g, "")
+          .replace(/\s+/g, " ")
           .trim();
 
-        // if after all cleaning it's empty or tiny, skip rendering
         if (!step || step.length < 3) return null;
 
         return (
@@ -136,10 +182,6 @@ const InstructionsList = ({ items }) => {
     </View>
   );
 };
-
-
-
-
 
 const styles = StyleSheet.create({
   container: {
