@@ -5,6 +5,7 @@ import { useFonts } from "expo-font";
 
 import RootNavigator from "./src/navigation/RootNavigator";
 import { AuthProvider } from "./src/context/AuthContext";
+import { FavoritesProvider } from "./src/context/FavoritesContext";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -21,10 +22,12 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <NavigationContainer>
-        <RootNavigator />
-        <StatusBar style="dark" />
-      </NavigationContainer>
+      <FavoritesProvider> 
+        <NavigationContainer>
+          <RootNavigator />
+          <StatusBar style="dark" />
+        </NavigationContainer>
+      </FavoritesProvider>
     </AuthProvider>
   );
 }

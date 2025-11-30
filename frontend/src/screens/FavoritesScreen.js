@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -10,40 +10,27 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function FavoritesScreen() {
-  const [saved, setSaved] = useState([
-    {
-      id: "1",
-      title: "Garlic Butter Pasta",
-      time: "20 Min",
-    },
-    {
-      id: "2",
-      title: "Chicken Teriyaki",
-      time: "25 Min",
-    },
-  ]);
+import { useFavorites } from "../context/FavoritesContext";
 
-  function removeItem(id) {
-    setSaved((prev) => prev.filter((x) => x.id !== id));
-  }
+export default function FavoritesScreen({ navigation }) {
+  const { favorites, removeFavorite } = useFavorites();
 
-  const isEmpty = saved.length === 0;
+  const isEmpty = favorites.length === 0;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 70 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         style={styles.root}
       >
-
+        {/* TITLE */}
         <Text style={styles.title}>Favorite Recipes</Text>
         <Text style={styles.subtitle}>
-          {saved.length} item{saved.length !== 1 ? "s" : ""} bookmarked
+          {favorites.length} item{favorites.length !== 1 ? "s" : ""} bookmarked
         </Text>
 
-
+        {/* EMPTY STATE */}
         {isEmpty && (
           <View style={styles.emptyBox}>
             <Image
@@ -57,13 +44,17 @@ export default function FavoritesScreen() {
           </View>
         )}
 
-
+        {/* SAVED LIST */}
         {!isEmpty && (
           <View style={styles.listWrapper}>
-            {saved.map((item) => (
-              <TouchableOpacity key={item.id} activeOpacity={0.85}>
+            {favorites.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                activeOpacity={0.85}
+                onPress={() => navigation.navigate("RecipeDetails", { recipe: item })}
+              >
                 <View style={styles.b2Card}>
-
+                  {/* ICON */}
                   <View style={styles.foodIconCircle}>
                     <Ionicons
                       name="restaurant-outline"
@@ -72,15 +63,15 @@ export default function FavoritesScreen() {
                     />
                   </View>
 
-
+                  {/* NAME + TIME */}
                   <View style={styles.textColumn}>
                     <Text style={styles.b2Title}>{item.title}</Text>
-                    <Text style={styles.b2Time}>{item.time}</Text>
+                    <Text style={styles.b2Time}>{item.time || "25 Min"}</Text>
                   </View>
 
-
+                  {/* DELETE */}
                   <TouchableOpacity
-                    onPress={() => removeItem(item.id)}
+                    onPress={() => removeFavorite(item.id)}
                     style={styles.deleteWrapper}
                   >
                     <Ionicons name="trash-outline" size={20} color="#e11932" />
@@ -91,7 +82,7 @@ export default function FavoritesScreen() {
           </View>
         )}
 
-
+        {/* YOU MAY ALSO LIKE */}
         <View style={styles.recommendBox}>
           <Text style={styles.recommendTitle}>You may also like</Text>
 
@@ -138,6 +129,7 @@ const styles = StyleSheet.create({
     fontFamily: "TransformaSemiBold",
     color: "#e11932",
   },
+
   subtitle: {
     marginTop: 4,
     fontSize: 14,
@@ -145,7 +137,6 @@ const styles = StyleSheet.create({
     color: "#666",
     marginBottom: 18,
   },
-
 
   emptyBox: {
     marginTop: 60,
@@ -171,10 +162,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
-
-  listWrapper: {
-    marginTop: 10,
-  },
+  listWrapper: { marginTop: 10 },
 
   b2Card: {
     flexDirection: "row",
@@ -186,7 +174,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     borderWidth: 1,
     borderColor: "#eee",
-
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 6,
@@ -203,9 +190,7 @@ const styles = StyleSheet.create({
     marginRight: 14,
   },
 
-  textColumn: {
-    flex: 1,
-  },
+  textColumn: { flex: 1 },
 
   b2Title: {
     fontFamily: "LatoBold",
@@ -220,14 +205,12 @@ const styles = StyleSheet.create({
     color: "#777",
   },
 
-  deleteWrapper: {
-    padding: 6,
-  },
-
+  deleteWrapper: { padding: 6 },
 
   recommendBox: {
     marginTop: 32,
   },
+
   recommendTitle: {
     fontSize: 18,
     fontFamily: "TransformaSemiBold",
@@ -235,10 +218,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
 
-  recommendCard: {
-    marginRight: 16,
-    width: 140,
-  },
+  recommendCard: { marginRight: 16, width: 140 },
 
   recImg: {
     width: "100%",

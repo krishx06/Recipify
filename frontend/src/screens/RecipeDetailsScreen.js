@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,11 +10,14 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { useFavorites } from "../context/FavoritesContext";   // ✅ IMPORT CONTEXT
 import { RECIPE_DETAILS } from "../data/recipeDetails";
 
 export default function RecipeDetailsScreen({ navigation, route }) {
   const recipe = route?.params?.recipe;
 
+  // ❗ If no recipe data found
   if (!recipe) {
     return (
       <View style={styles.center}>
@@ -23,14 +26,35 @@ export default function RecipeDetailsScreen({ navigation, route }) {
     );
   }
 
+  // ⭐ Favorites Context
+  const { favorites, addFavorite, removeFavorite } = useFavorites();
+
+  // ⭐ Local state for tab & saved status
   const [activeTab, setActiveTab] = useState("ingredients");
+
+  // ⭐ Sync saved state with global context
   const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    const isSaved = favorites.some((item) => item.id === recipe.id);
+    setSaved(isSaved);
+  }, [favorites, recipe.id]);
 
+  // ⭐ Full preparation from local fallback data (optional)
   const manual = RECIPE_DETAILS[recipe.id];
-
   const ingredients = manual?.ingredients || recipe.ingredients;
   const instructions = manual?.instructions || recipe.instructions;
 
+  // ⭐ Save / Remove logic
+  function toggleSave() {
+    if (saved) {
+      removeFavorite(recipe.id);
+    } else {
+      addFavorite(recipe);
+    }
+    setSaved(!saved);
+  }
+
+  // ⭐ Share recipe
   async function shareRecipe() {
     try {
       await Share.share({
@@ -43,25 +67,23 @@ export default function RecipeDetailsScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-
-      {/* ⭐ FLOATING SAFE-AREA TOP BUTTONS ⭐ */}
+      {/* ⭐ FLOATING TOP BUTTONS */}
       <SafeAreaView style={[styles.safeTop, { position: "absolute", top: 0, zIndex: 20 }]}>
         <View style={styles.topButtons}>
 
-          {/* BACK BUTTON */}
+          {/* BACK */}
           <TouchableOpacity style={styles.roundBtn} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={22} color="#e11932" />
           </TouchableOpacity>
 
-          {/* RIGHT BUTTONS */}
           <View style={{ flexDirection: "row", gap: 12 }}>
             {/* SHARE */}
             <TouchableOpacity style={styles.roundBtn} onPress={shareRecipe}>
               <Ionicons name="share-outline" size={22} color="#e11932" />
             </TouchableOpacity>
 
-            {/* SAVE */}
-            <TouchableOpacity style={styles.roundBtn} onPress={() => setSaved(!saved)}>
+            {/* SAVE / UNSAVE */}
+            <TouchableOpacity style={styles.roundBtn} onPress={toggleSave}>
               <Ionicons
                 name={saved ? "bookmark" : "bookmark-outline"}
                 size={22}
@@ -73,6 +95,7 @@ export default function RecipeDetailsScreen({ navigation, route }) {
         </View>
       </SafeAreaView>
 
+      {/* CONTENT */}
       <ScrollView showsVerticalScrollIndicator={false}>
         
         {/* IMAGE */}
@@ -83,7 +106,7 @@ export default function RecipeDetailsScreen({ navigation, route }) {
         {/* TITLE */}
         <Text style={styles.title}>{recipe.title}</Text>
 
-        {/* META */}
+        {/* META INFO */}
         <View style={styles.metaRow}>
           <Meta icon="time-outline" text={recipe.time || "30 Min"} />
           <Meta icon="people-outline" text={`Serves ${recipe.serves || 4}`} />
@@ -118,6 +141,8 @@ export default function RecipeDetailsScreen({ navigation, route }) {
     </View>
   );
 }
+
+// ------------- COMPONENTS ------------------
 
 const Meta = ({ icon, text }) => (
   <View style={styles.metaItem}>
@@ -183,11 +208,10 @@ const InstructionsList = ({ items }) => {
   );
 };
 
+// ------------- STYLES ----------------------
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
 
   imageContainer: {
     height: 320,
@@ -197,15 +221,9 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 25,
   },
 
-  image: {
-    height: "100%",
-    width: "100%",
-  },
+  image: { height: "100%", width: "100%" },
 
-  safeTop: {
-    position: "absolute",
-    width: "100%",
-  },
+  safeTop: { position: "absolute", width: "100%" },
 
   topButtons: {
     flexDirection: "row",
@@ -279,10 +297,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 
-  bulletRow: {
-    flexDirection: "row",
-    marginBottom: 12,
-  },
+  bulletRow: { flexDirection: "row", marginBottom: 12 },
 
   bulletDot: {
     fontSize: 20,
