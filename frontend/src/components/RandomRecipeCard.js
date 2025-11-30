@@ -8,17 +8,9 @@ import {
 } from "react-native";
 
 export default function RandomRecipeCard({ selected, spinAndPick, navigation }) {
-  const handlePress = () => {
-    if (!selected) {
-      spinAndPick();
-      return;
-    }
-
-    navigation.navigate("RecipeDetails", { recipe: selected });
-  };
-
   return (
-    <TouchableOpacity activeOpacity={0.9} onPress={handlePress} style={styles.card}>
+    <View style={styles.card}>
+      {/* LEFT SIDE IMAGE OR PLACEHOLDER */}
       <View style={styles.left}>
         {selected ? (
           <Image source={{ uri: selected.image }} style={styles.image} />
@@ -29,24 +21,41 @@ export default function RandomRecipeCard({ selected, spinAndPick, navigation }) 
         )}
       </View>
 
+      {/* RIGHT SIDE TEXT + BUTTONS */}
       <View style={styles.right}>
         <Text style={styles.category}>
-          {selected ? selected.category || "Featured Dish" : "Get Started"}
+          {selected ? selected.category : "Get Started"}
         </Text>
 
         <Text style={styles.title} numberOfLines={2}>
-          {selected ? selected.title : "Tap to Spin"}
+          {selected ? selected.title : "Tap Spin to get a recipe"}
         </Text>
 
-        <TouchableOpacity
-          style={styles.spinButton}
-          onPress={handlePress}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.spinText}>{selected ? "View" : "Spin"}</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonRow}>
+          {/* SPIN AGAIN BUTTON — ALWAYS VISIBLE */}
+          <TouchableOpacity
+            style={[styles.btn, { backgroundColor: "#e11932" }]}
+            onPress={spinAndPick}
+          >
+            <Text style={styles.btnText}>Spin</Text>
+          </TouchableOpacity>
+
+          {/* VIEW BUTTON — ONLY WHEN RECIPE EXISTS */}
+          {selected && (
+            <TouchableOpacity
+              style={[styles.btn, { backgroundColor: "#333" }]}
+              onPress={() =>
+                navigation.navigate("RecipeDetails", { recipe: selected })
+              }
+            >
+              <Text style={[styles.btnText, { color: "#fff" }]}>
+                View
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -60,41 +69,72 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.18,
     shadowRadius: 10,
     elevation: 4,
-    height: 180,
+    height: 190,
     marginTop: 20,
     overflow: "hidden",
+    borderColor: "#7f000090",
+    borderWidth: 0.5,
   },
+
   left: {
     width: "50%",
     height: "100%",
   },
-  image: { width: "100%", height: "100%", resizeMode: "cover" },
+
+  image: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+
   placeholder: {
     flex: 1,
     backgroundColor: "#f3f3f3",
     justifyContent: "center",
     alignItems: "center",
   },
-  placeholderText: { fontFamily: "LatoRegular", fontSize: 14, color: "#666" },
+
+  placeholderText: {
+    fontFamily: "LatoRegular",
+    fontSize: 14,
+    color: "#666",
+  },
+
   right: {
     width: "50%",
     padding: 16,
     justifyContent: "space-between",
     backgroundColor: "#fff",
   },
-  category: { fontSize: 12, fontFamily: "LatoRegular", color: "#666" },
+
+  category: {
+    fontSize: 12,
+    fontFamily: "LatoRegular",
+    color: "#666",
+  },
+
   title: {
     fontSize: 18,
     fontFamily: "TransformaSemiBold",
     color: "#111",
     lineHeight: 22,
   },
-  spinButton: {
-    backgroundColor: "#e11932",
+
+  buttonRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+
+  btn: {
     paddingVertical: 10,
+    paddingHorizontal: 18,
     borderRadius: 10,
-    width: 90,
     alignItems: "center",
   },
-  spinText: { fontFamily: "TransformaSemiBold", fontSize: 16, color: "#fff" },
+
+  btnText: {
+    fontFamily: "LatoBold",
+    fontSize: 16,
+    color: "#fff",
+  },
 });
