@@ -47,7 +47,7 @@ export default function FavoritesScreen() {
         {isEmpty && (
           <View style={styles.emptyBox}>
             <Image
-              source={require("../../assets/images/emptySavedImg.png")}
+              source={require("../assets/images/emptySavedImg.png")}
               style={styles.emptyImg}
             />
             <Text style={styles.emptyTitle}>No saved recipes yet</Text>

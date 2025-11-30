@@ -6,18 +6,26 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import LottieView from "lottie-react-native";
 
 export default function RandomRecipeCard({ selected, spinAndPick, navigation }) {
   return (
     <View style={styles.card}>
-      {/* LEFT SIDE IMAGE OR PLACEHOLDER */}
+      
+      {/* LEFT SIDE (IMAGE OR LOTTIE) */}
       <View style={styles.left}>
-        {selected ? (
-          <Image source={{ uri: selected.image }} style={styles.image} />
+        {!selected ? (
+          <LottieView
+            source={require("../assets/lottie/foodprep.json")}
+            autoPlay
+            loop
+            style={styles.lottie}
+          />
         ) : (
-          <View style={styles.placeholder}>
-            <Text style={styles.placeholderText}>No recipe yet</Text>
-          </View>
+          <Image
+            source={{ uri: selected.image }}
+            style={styles.image}
+          />
         )}
       </View>
 
@@ -32,7 +40,7 @@ export default function RandomRecipeCard({ selected, spinAndPick, navigation }) 
         </Text>
 
         <View style={styles.buttonRow}>
-          {/* SPIN AGAIN BUTTON — ALWAYS VISIBLE */}
+          {/* SPIN BUTTON */}
           <TouchableOpacity
             style={[styles.btn, { backgroundColor: "#e11932" }]}
             onPress={spinAndPick}
@@ -40,7 +48,7 @@ export default function RandomRecipeCard({ selected, spinAndPick, navigation }) 
             <Text style={styles.btnText}>Spin</Text>
           </TouchableOpacity>
 
-          {/* VIEW BUTTON — ONLY WHEN RECIPE EXISTS */}
+          {/* VIEW BUTTON - ONLY IF RECIPE SELECTED */}
           {selected && (
             <TouchableOpacity
               style={[styles.btn, { backgroundColor: "#333" }]}
@@ -48,13 +56,12 @@ export default function RandomRecipeCard({ selected, spinAndPick, navigation }) 
                 navigation.navigate("RecipeDetails", { recipe: selected })
               }
             >
-              <Text style={[styles.btnText, { color: "#fff" }]}>
-                View
-              </Text>
+              <Text style={styles.btnText}>View</Text>
             </TouchableOpacity>
           )}
         </View>
       </View>
+
     </View>
   );
 }
@@ -79,25 +86,19 @@ const styles = StyleSheet.create({
   left: {
     width: "50%",
     height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  lottie: {
+    width: 140,
+    height: 140,
   },
 
   image: {
     width: "100%",
     height: "100%",
     resizeMode: "cover",
-  },
-
-  placeholder: {
-    flex: 1,
-    backgroundColor: "#f3f3f3",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  placeholderText: {
-    fontFamily: "LatoRegular",
-    fontSize: 14,
-    color: "#666",
   },
 
   right: {
@@ -118,11 +119,13 @@ const styles = StyleSheet.create({
     fontFamily: "TransformaSemiBold",
     color: "#111",
     lineHeight: 22,
+    marginTop: 4,
   },
 
   buttonRow: {
     flexDirection: "row",
     gap: 10,
+    marginTop: 10,
   },
 
   btn: {
@@ -138,3 +141,5 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 });
+
+
