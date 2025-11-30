@@ -9,126 +9,64 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { RECIPE_DETAILS } from "../data/recipeDetails";
 
-const DEMO_RECIPE = {
-  id: "demo-1",
-  title: "Methi Palak Sabzi",
-  image:
-    "https://images.unsplash.com/photo-1543332164-8f4a5b6c8a6a?w=1400&q=80",
-  time: "15 mins",
-  serves: 4,
-  difficulty: "Easy",
-  cuisine: "Indian",
-  ingredients: [
-    "1 bunch methi leaves, chopped",
-    "1 bunch palak leaves, chopped",
-    "1 onion, finely chopped",
-    "1 tomato, finely chopped",
-    "1 green chili, finely chopped",
-    "1 tsp ginger-garlic paste",
-    "1/2 tsp turmeric powder",
-    "1 tsp red chili powder",
-    "1/2 tsp coriander powder",
-    "1/4 tsp garam masala",
-    "2 tbsp oil",
-    "Salt to taste",
-  ],
-  instructions: [
-    "Heat oil in a pan. Add onion and sauté until golden.",
-    "Add ginger-garlic paste and green chili.",
-    "Add tomatoes and cook until soft.",
-    "Add dry spices and sauté.",
-    "Add methi & palak and cook.",
-    "Add salt and garam masala and finish.",
-    "Serve hot with roti or rice.",
-  ],
-};
 
 export default function RecipeDetailsScreen({ navigation, route }) {
-  const incoming = route?.params?.recipe ?? {};
+  const recipe = route?.params?.recipe;
 
-  const recipe = {
-    ...DEMO_RECIPE,
-    ...incoming,
-    ingredients: incoming.ingredients ?? DEMO_RECIPE.ingredients,
-    instructions: incoming.instructions ?? DEMO_RECIPE.instructions,
-    serves: incoming.serves ?? DEMO_RECIPE.serves,
-    difficulty: incoming.difficulty ?? DEMO_RECIPE.difficulty,
-    cuisine: incoming.cuisine ?? DEMO_RECIPE.cuisine,
-  };
+  if (!recipe) {
+    return (
+      <View style={styles.center}>
+        <Text>No recipe found.</Text>
+      </View>
+    );
+  }
 
   const [activeTab, setActiveTab] = useState("ingredients");
   const [saved, setSaved] = useState(false);
 
+  const manual = RECIPE_DETAILS[recipe.id];
+
+  const ingredients = manual?.ingredients || recipe.ingredients;
+  const instructions = manual?.instructions || recipe.instructions;
+
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
+        
+        {/* IMAGE */}
         <View style={styles.imageContainer}>
           <Image source={{ uri: recipe.image }} style={styles.image} />
-
-          <SafeAreaView style={styles.safeTop}>
-            <View style={styles.topButtons}>
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.canGoBack()
-                    ? navigation.goBack()
-                    : navigation.navigate("Home")
-                }
-                style={styles.roundBtn}
-              >
-                <Ionicons name="arrow-back" size={22} color="#e11932" />
-              </TouchableOpacity>
-
-              <View style={{ flexDirection: "row", gap: 12 }}>
-                <TouchableOpacity style={styles.roundBtn}>
-                  <Ionicons name="share-outline" size={22} color="#e11932" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.roundBtn}
-                  onPress={() => setSaved(!saved)}
-                >
-                  <Ionicons
-                    name={saved ? "bookmark" : "bookmark-outline"}
-                    size={22}
-                    color="#e11932"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </SafeAreaView>
         </View>
 
+        {/* TITLE */}
         <Text style={styles.title}>{recipe.title}</Text>
 
+        {/* META */}
         <View style={styles.metaRow}>
-          <Meta icon="time-outline" text={recipe.time} />
-          <Meta icon="people-outline" text={`Serves ${recipe.serves}`} />
-          <Meta icon="bar-chart-outline" text={recipe.difficulty} />
-          <Meta icon="globe-outline" text={recipe.cuisine} />
+          <Meta icon="time-outline" text={recipe.time || "30 Min"} />
+          <Meta icon="people-outline" text={`Serves ${recipe.serves || 4}`} />
+          <Meta icon="bar-chart-outline" text={recipe.difficulty || "Easy"} />
+          <Meta icon="globe-outline" text={recipe.cuisine || "Not specified"} />
         </View>
 
+        {/* TABS */}
         <View style={styles.tabsRow}>
-          <TabButton
-            label="Ingredients"
-            active={activeTab === "ingredients"}
-            onPress={() => setActiveTab("ingredients")}
-          />
-
-          <TabButton
-            label="Instructions"
-            active={activeTab === "instructions"}
-            onPress={() => setActiveTab("instructions")}
-          />
+          <TabButton label="Ingredients" active={activeTab === "ingredients"} onPress={() => setActiveTab("ingredients")} />
+          <TabButton label="Instructions" active={activeTab === "instructions"} onPress={() => setActiveTab("instructions")} />
         </View>
 
+        {/* CONTENT */}
         <View style={{ marginTop: 15, paddingBottom: 40 }}>
-          {activeTab === "ingredients" ? (
-            <IngredientsList items={recipe.ingredients} />
-          ) : (
-            <InstructionsList items={recipe.instructions} />
-          )}
-        </View>
+  {activeTab === "ingredients" ? (
+    <IngredientsList items={ingredients || []} />
+  ) : (
+    <InstructionsList items={instructions || []} />
+  )}
+</View>
+
+
       </ScrollView>
     </View>
   );
@@ -168,22 +106,40 @@ const IngredientsList = ({ items }) => {
 
 const InstructionsList = ({ items }) => {
   const safeItems = Array.isArray(items) ? items : [];
+
   return (
     <View style={{ paddingHorizontal: 20 }}>
-      {safeItems.map((step, index) => (
-        <View key={index} style={styles.stepCard}>
-          <Text style={styles.stepNumber}>
-            {String(index + 1).padStart(2, "0")}
-          </Text>
+      {safeItems.map((rawStep, index) => {
+        if (typeof rawStep !== "string") return null;
 
-          <View style={{ flex: 1 }}>
-            <Text style={styles.stepText}>{step}</Text>
+        const step = rawStep
+          .replace(/<[^>]*>/g, "")   // remove HTML
+          .replace(/\u200B/g, "")    // zero-width
+          .replace(/\t+/g, "")       // tabs
+          .replace(/\s+/g, " ")      // extra spaces
+          .trim();
+
+        // if after all cleaning it's empty or tiny, skip rendering
+        if (!step || step.length < 3) return null;
+
+        return (
+          <View key={index} style={styles.stepCard}>
+            <Text style={styles.stepNumber}>
+              {String(index + 1).padStart(2, "0")}
+            </Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.stepText}>{step}</Text>
+            </View>
           </View>
-        </View>
-      ))}
+        );
+      })}
     </View>
   );
 };
+
+
+
+
 
 const styles = StyleSheet.create({
   container: {
