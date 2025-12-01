@@ -97,7 +97,7 @@ export default function RecipeDetailsScreen({ navigation, route }) {
 
       {/* CONTENT */}
       <ScrollView showsVerticalScrollIndicator={false}>
-        
+
         {/* IMAGE */}
         <View style={styles.imageContainer}>
           <Image source={{ uri: recipe.image }} style={styles.image} />
