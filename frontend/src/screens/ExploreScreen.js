@@ -350,8 +350,8 @@ export default function ExploreScreen({ navigation }) {
         {query.length > 0
           ? `Results for "${query}"`
           : activeCuisine === "All"
-          ? "All Recipes"
-          : `${activeCuisine} Recipes`}
+            ? "All Recipes"
+            : `${activeCuisine} Recipes`}
       </Text>
     </View>
   ), [query, activeCuisine, trending, loadingTrending]);
