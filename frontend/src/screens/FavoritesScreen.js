@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,8 +14,71 @@ import { useFavorites } from "../context/FavoritesContext";
 
 export default function FavoritesScreen({ navigation }) {
   const { favorites, removeFavorite } = useFavorites();
+  const [recommendations, setRecommendations] = useState([]);
+  const [loadingRecs, setLoadingRecs] = useState(false);
 
   const isEmpty = favorites.length === 0;
+
+  // Fetch recommendations when favorites change
+  useEffect(() => {
+    if (favorites.length > 0) {
+      fetchRecommendations();
+    } else {
+      setRecommendations([]);
+    }
+  }, [favorites]);
+
+  async function fetchRecommendations() {
+    // 1. Find top cuisine
+    const cuisineCounts = {};
+    favorites.forEach((fav) => {
+      if (fav.cuisine) {
+        cuisineCounts[fav.cuisine] = (cuisineCounts[fav.cuisine] || 0) + 1;
+      }
+    });
+
+    let topCuisine = "All";
+    let maxCount = 0;
+
+    Object.entries(cuisineCounts).forEach(([cuisine, count]) => {
+      if (count > maxCount) {
+        maxCount = count;
+        topCuisine = cuisine;
+      }
+    });
+
+    // If no specific cuisine found, maybe default to "Italian" or keep "All"
+    if (topCuisine === "Mixed" || !topCuisine) topCuisine = "Italian"; // Default to Italian for better results
+
+    try {
+      setLoadingRecs(true);
+      // Use TheMealDB
+      let url = `https://www.themealdb.com/api/json/v1/1/filter.php?a=${topCuisine}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.meals) {
+        // Filter out recipes that are already in favorites
+        const favIds = new Set(favorites.map(f => f.id));
+        const filtered = data.meals.filter(m => !favIds.has(m.idMeal));
+
+        // Map to our app's recipe format
+        const mapped = filtered.map(m => ({
+          id: m.idMeal,
+          title: m.strMeal,
+          image: m.strMealThumb,
+          // We don't have time/difficulty from this endpoint, so we can omit or mock
+        }));
+
+        setRecommendations(mapped.slice(0, 5));
+      }
+      setLoadingRecs(false);
+    } catch (err) {
+      console.log("Error fetching recommendations:", err);
+      setLoadingRecs(false);
+    }
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -83,34 +146,24 @@ export default function FavoritesScreen({ navigation }) {
         )}
 
         {/* YOU MAY ALSO LIKE */}
-        <View style={styles.recommendBox}>
-          <Text style={styles.recommendTitle}>You may also like</Text>
+        {!isEmpty && recommendations.length > 0 && (
+          <View style={styles.recommendBox}>
+            <Text style={styles.recommendTitle}>You may also like</Text>
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {[
-              {
-                id: "r1",
-                name: "Veggie Stir Fry",
-                img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80",
-              },
-              {
-                id: "r2",
-                name: "Avocado Toast",
-                img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&q=80",
-              },
-              {
-                id: "r3",
-                name: "Sushi Bowl",
-                img: "https://images.unsplash.com/photo-1546069901-5f3f5ed9b3a4?w=1200&q=80",
-              },
-            ].map((rec) => (
-              <View key={rec.id} style={styles.recommendCard}>
-                <Image source={{ uri: rec.img }} style={styles.recImg} />
-                <Text style={styles.recName}>{rec.name}</Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {recommendations.map((rec) => (
+                <TouchableOpacity
+                  key={rec.id}
+                  style={styles.recommendCard}
+                  onPress={() => navigation.navigate("RecipeDetails", { recipe: rec })}
+                >
+                  <Image source={{ uri: rec.image }} style={styles.recImg} />
+                  <Text style={styles.recName} numberOfLines={2}>{rec.title}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

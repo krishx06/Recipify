@@ -8,10 +8,15 @@ import {
   StyleSheet,
   Keyboard,
   Alert,
+  ActivityIndicator,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+/* ============================================================
+   CONSTANTS
+   ============================================================ */
 const QUICK_INGREDIENTS = [
   "Chicken",
   "Rice",
@@ -38,20 +43,28 @@ const CUISINES = [
 
 const RECIPE_CATEGORIES = ["Breakfast", "Brunch", "Lunch", "Dinner", "Snack"];
 
-export default function AiChefScreen() {
+export default function AiChefScreen({ navigation }) {
   const [input, setInput] = useState("");
   const [ingredients, setIngredients] = useState([]);
 
   const [selectedCuisine, setSelectedCuisine] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
+  const [loading, setLoading] = useState(false);
+  const [recipes, setRecipes] = useState([]); // Store generated recipes
+
+  /* ============================================================
+     INGREDIENT ACTIONS
+     ============================================================ */
   function addIngredientFromInput() {
     const trimmed = input.trim();
     if (!trimmed) return;
+
     if (ingredients.includes(trimmed)) {
       setInput("");
       return;
     }
+
     setIngredients((s) => [trimmed, ...s]);
     setInput("");
     Keyboard.dismiss();
@@ -69,46 +82,103 @@ export default function AiChefScreen() {
     setIngredients((s) => s.filter((x) => x !== item));
   }
 
+  /* ============================================================
+     CUISINE / CATEGORY SELECT
+     ============================================================ */
   function toggleCuisine(c) {
-    if (selectedCuisine === c) setSelectedCuisine(null);
-    else setSelectedCuisine(c);
+    setSelectedCuisine((prev) => (prev === c ? null : c));
   }
 
   function toggleCategory(cat) {
-    if (selectedCategory === cat) setSelectedCategory(null);
-    else setSelectedCategory(cat);
+    setSelectedCategory((prev) => (prev === cat ? null : cat));
   }
 
   function clearAll() {
     setIngredients([]);
     setInput("");
-    setSelectedCuisine("Indian");
+    setSelectedCuisine(null);
     setSelectedCategory(null);
+    setRecipes([]); // Clear recipes too
   }
 
-  function generateRecipes() {
+  /* ============================================================
+     GENERATE WITH GEMINI API
+     ============================================================ */
+  async function generateRecipes() {
     if (ingredients.length === 0) {
       Alert.alert("Add ingredients", "Please add at least one ingredient.");
       return;
     }
 
-    Alert.alert(
-      "Generate (placeholder)",
-      `Ingredients: ${ingredients.join(", ")}\nCuisine: ${
-        selectedCuisine || "Any"
-      }\nCategory: ${selectedCategory || "Any"}`
-    );
+    try {
+      setLoading(true);
+      setRecipes([]); // Clear previous results while loading
+
+      const res = await fetch("http://localhost:5001/ai/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ingredients,
+          cuisine: selectedCuisine,
+          mealType: selectedCategory,
+        }),
+      });
+
+      const data = await res.json();
+      setLoading(false);
+
+      if (!data.recipes) {
+        Alert.alert("Error", "AI did not return recipes.");
+        return;
+      }
+
+      setRecipes(data.recipes); // Set recipes to state
+    } catch (error) {
+      setLoading(false);
+      Alert.alert("Error", "Something went wrong while generating recipes.");
+      console.log("AI Error:", error);
+    }
   }
 
+  /* ============================================================
+     HANDLE OPEN RECIPE
+     ============================================================ */
+  const handleOpenRecipe = (recipe) => {
+    const formattedRecipe = {
+      id: Math.random().toString(),
+      title: recipe.title,
+      image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80",
+      time: recipe.time,
+      serves: recipe.servings,
+      difficulty: recipe.difficulty,
+      cuisine: "AI Generated",
+      ingredients: recipe.ingredients,
+      instructions: recipe.instructions,
+    };
+    navigation.navigate("RecipeDetails", { recipe: formattedRecipe });
+  };
+
+  /* ============================================================
+     UI
+     ============================================================ */
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      {/* LOADING OVERLAY */}
+      <Modal transparent visible={loading}>
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#e11932" />
+          <Text style={styles.loadingText}>Cooking up ideas...</Text>
+        </View>
+      </Modal>
+
       <ScrollView
         style={styles.root}
-        contentContainerStyle={{ paddingBottom: 50 }}
+        contentContainerStyle={{ paddingBottom: 60 }}
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.question}>What ingredients do you have?</Text>
 
+        {/* INPUT ROW */}
         <View style={styles.inputRow}>
           <TextInput
             value={input}
@@ -124,17 +194,19 @@ export default function AiChefScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* SELECTED INGREDIENT CHIPS */}
         <View style={styles.rowWrap}>
           {ingredients.map((it) => (
             <View key={it} style={styles.chipSelected}>
               <Text style={styles.chipTextSelected}>{it}</Text>
               <TouchableOpacity onPress={() => removeIngredient(it)}>
-                <Ionicons name="close" size={14} color="#777" />
+                <Ionicons name="close" size={14} color="#ff0404ff" />
               </TouchableOpacity>
             </View>
           ))}
         </View>
 
+        {/* QUICK INGREDIENTS */}
         <Text style={styles.sectionTitle}>Quick add common ingredients</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {QUICK_INGREDIENTS.map((it) => {
@@ -145,9 +217,7 @@ export default function AiChefScreen() {
                 style={[styles.quickChip, active && styles.quickChipActive]}
                 onPress={() => toggleQuickIngredient(it)}
               >
-                <Text
-                  style={[styles.quickText, active && styles.quickTextActive]}
-                >
+                <Text style={[styles.quickText, active && styles.quickTextActive]}>
                   {it}
                 </Text>
               </TouchableOpacity>
@@ -155,6 +225,7 @@ export default function AiChefScreen() {
           })}
         </ScrollView>
 
+        {/* CUISINE */}
         <Text style={styles.filterHeading}>Cuisine</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {CUISINES.map((c) => {
@@ -165,9 +236,7 @@ export default function AiChefScreen() {
                 style={[styles.filterChip, active && styles.filterChipActive]}
                 onPress={() => toggleCuisine(c)}
               >
-                <Text
-                  style={[styles.filterText, active && styles.filterTextActive]}
-                >
+                <Text style={[styles.filterText, active && styles.filterTextActive]}>
                   {c}
                 </Text>
               </TouchableOpacity>
@@ -175,6 +244,7 @@ export default function AiChefScreen() {
           })}
         </ScrollView>
 
+        {/* MEAL TYPE */}
         <Text style={styles.filterHeading}>Meal Type</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {RECIPE_CATEGORIES.map((cat) => {
@@ -185,9 +255,7 @@ export default function AiChefScreen() {
                 style={[styles.filterChip, active && styles.filterChipActive]}
                 onPress={() => toggleCategory(cat)}
               >
-                <Text
-                  style={[styles.filterText, active && styles.filterTextActive]}
-                >
+                <Text style={[styles.filterText, active && styles.filterTextActive]}>
                   {cat}
                 </Text>
               </TouchableOpacity>
@@ -195,10 +263,12 @@ export default function AiChefScreen() {
           })}
         </ScrollView>
 
+        {/* CLEAR */}
         <TouchableOpacity style={styles.clearBtn} onPress={clearAll}>
           <Text style={styles.clearText}>Clear</Text>
         </TouchableOpacity>
 
+        {/* GENERATE BUTTON */}
         <TouchableOpacity style={styles.generateBtn} onPress={generateRecipes}>
           <Ionicons
             name="sparkles"
@@ -206,19 +276,75 @@ export default function AiChefScreen() {
             color="#fff"
             style={{ marginRight: 8 }}
           />
-          <Text style={styles.generateText}>Generate with <Text style={styles.aiText}>Recipify AI</Text></Text>
+          <Text style={styles.generateText}>
+            Generate with <Text style={styles.aiText}>Recipify AI</Text>
+          </Text>
         </TouchableOpacity>
+
+        {/* RESULTS LIST */}
+        {recipes.length > 0 && (
+          <View style={{ marginTop: 30 }}>
+            <Text style={styles.resultsHeading}>AI Suggestions</Text>
+            {recipes.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.card}
+                onPress={() => handleOpenRecipe(item)}
+              >
+                <View style={styles.cardHeader}>
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{item.type === "strict" ? "STRICT" : "CREATIVE"}</Text>
+                  </View>
+                  <Ionicons name="sparkles-outline" size={20} color="#ff0e2aff" />
+                </View>
+
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
+
+                <View style={styles.metaRow}>
+                  <View style={styles.metaItem}>
+                    <Ionicons name="time-outline" size={14} color="#666" />
+                    <Text style={styles.metaText}>{item.time}</Text>
+                  </View>
+                  <View style={styles.metaItem}>
+                    <Ionicons name="bar-chart-outline" size={14} color="#666" />
+                    <Text style={styles.metaText}>{item.difficulty}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+/* ============================================================
+   STYLES
+   ============================================================ */
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 20,
-    paddingTop: 30, 
+    paddingTop: 30,
+  },
+
+  /* LOADING OVERLAY */
+  loadingOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  loadingText: {
+    marginTop: 10,
+    color: "#fff",
+    fontFamily: "LatoBold",
+    fontSize: 16,
   },
 
   question: {
@@ -260,9 +386,9 @@ const styles = StyleSheet.create({
 
   chipSelected: {
     flexDirection: "row",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "grey",
+    backgroundColor: "#ffdbdbff",
+    borderWidth: 0.5,
+    borderColor: "#dc1414ff",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 20,
@@ -272,7 +398,7 @@ const styles = StyleSheet.create({
 
   chipTextSelected: {
     fontFamily: "LatoRegular",
-    color: "#111",
+    color: "#ff0707ff",
   },
 
   sectionTitle: {
@@ -361,8 +487,74 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "LatoBold",
   },
+
   aiText: {
     fontFamily: "TransformaSemiBold",
-    fontSize: 16
-  }
+    fontSize: 16,
+  },
+
+  /* RESULTS STYLES */
+  resultsHeading: {
+    fontSize: 20,
+    fontFamily: "TransformaSemiBold",
+    color: "#111",
+    marginBottom: 15,
+  },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  badge: {
+    backgroundColor: "#ffebee",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  badgeText: {
+    color: "#e11932",
+    fontSize: 10,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#111",
+    marginBottom: 6,
+  },
+  description: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+  metaRow: {
+    flexDirection: "row",
+    gap: 15,
+  },
+  metaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  metaText: {
+    fontSize: 12,
+    color: "#666",
+    fontWeight: "500",
+  },
 });
