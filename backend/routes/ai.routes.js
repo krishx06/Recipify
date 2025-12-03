@@ -4,13 +4,9 @@ import { buildChefPrompt } from "../utils/buildPrompts.js";
 
 const router = express.Router();
 
-/* ============================================================
-   POST /ai/generate
-   INGREDIENTS → PROMPT → GEMINI → CLEAN JSON → RETURN
-   ============================================================ */
 router.post("/generate", async (req, res) => {
     try {
-        /* Initialize AI here to ensure env vars are loaded */
+
         const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
         const { ingredients, cuisine, mealType } = req.body;
@@ -23,9 +19,8 @@ router.post("/generate", async (req, res) => {
 
         const prompt = buildChefPrompt({ ingredients, cuisine, mealType });
 
-        console.log("🔥 Prompt sent to Gemini:\n", prompt);
+        console.log("Prompt sent to Gemini:\n", prompt);
 
-        /* CALL GEMINI */
         const model = ai.getGenerativeModel({
             model: "gemini-2.0-flash-001",
         });
@@ -33,9 +28,8 @@ router.post("/generate", async (req, res) => {
         const result = await model.generateContent(prompt);
 
         let text = result.response.text().trim();
-        console.log("⚡ Raw Gemini Response:", text);
+        console.log("Raw Gemini Response:", text);
 
-        // ---- CLEAN + PARSE JSON ----
         const jsonStart = text.indexOf("{");
         const jsonEnd = text.lastIndexOf("}");
 
@@ -52,7 +46,7 @@ router.post("/generate", async (req, res) => {
         try {
             parsed = JSON.parse(clean);
         } catch (err) {
-            console.log("❌ JSON Parse Error:", err);
+            console.log("JSON Parse Error:", err);
             return res.status(500).json({
                 message: "Failed to parse AI JSON response",
                 raw: clean,
@@ -61,7 +55,7 @@ router.post("/generate", async (req, res) => {
 
         return res.json(parsed);
     } catch (error) {
-        console.log("❌ AI Generation Error:", error);
+        console.log("AI Generation Error:", error);
         return res.status(500).json({
             message: "Recipe generation failed",
             error: error.message,

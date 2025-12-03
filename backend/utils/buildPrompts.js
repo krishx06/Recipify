@@ -1,7 +1,6 @@
-// backend/utils/buildPrompts.js
 export function buildChefPrompt({ ingredients = [], cuisine = null, mealType = null }) {
   if (!Array.isArray(ingredients)) {
-    console.warn("❌ buildChefPrompt received non-array ingredients:", ingredients);
+    console.warn("buildChefPrompt received non-array ingredients:", ingredients);
     ingredients = [];
   }
 
@@ -45,7 +44,7 @@ For **every recipe**:
   - \`tips\`: array of 3 short tips
   - \`type\`: "strict" or "creative"
 
-⚠️ RESPONSE FORMAT (VERY IMPORTANT):
+RESPONSE FORMAT (VERY IMPORTANT):
 Return **VALID JSON ONLY**, no markdown, no explanations.
 
 Use exactly this shape:
