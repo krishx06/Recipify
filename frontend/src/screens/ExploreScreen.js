@@ -350,7 +350,7 @@ export default function ExploreScreen({ navigation }) {
         {query.length > 0
           ? `Results for "${query}"`
           : activeCuisine === "All"
-            ? "All Recipes"
+            ? "Explore Recipes"
             : `${activeCuisine} Recipes`}
       </Text>
     </View>
