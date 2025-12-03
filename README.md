@@ -36,7 +36,7 @@ The app allows users to:
 ## 7. Technology Stack  
 - **Frontend:** React Native (Expo), React Navigation, Supabase Auth (Google OAuth)
 - **Backend:** Node.js, Express.js, MongoDB (Mongoose),
-- **APIs:** Spoonacular API, Edamam API, Gemini AI API
+- **APIs:** TheMealDB API, Gemini AI API
 
 ## 8. Expected Outcome  
 A fully functional mobile app that:  
