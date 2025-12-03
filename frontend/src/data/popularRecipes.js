@@ -1,5 +1,3 @@
-// src/data/popularRecipes.js
-
 export const POPULAR_RECIPES = [
   {
     id: "pop1",

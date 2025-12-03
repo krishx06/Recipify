@@ -13,9 +13,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
-/* ============================================================
-   🔥 SKELETON SHIMMER COMPONENT
-   ============================================================ */
 function Skeleton({ width, height, style }) {
   const opacityAnim = useRef(new Animated.Value(0.3)).current;
 
@@ -52,9 +49,6 @@ function Skeleton({ width, height, style }) {
   );
 }
 
-/* ============================================================
-   CUISINES (Indian second)
-   ============================================================ */
 const CUISINES = [
   { icon: "fast-food", label: "American" },
   { icon: "flame", label: "Indian" },
@@ -82,9 +76,6 @@ const CUISINES = [
   { icon: "rainy", label: "Vietnamese" },
 ];
 
-/* ============================================================
-   TRENDING
-   ============================================================ */
 async function fetchTrendingMeals() {
   const items = [];
   for (let i = 0; i < 5; i++) {
@@ -95,9 +86,6 @@ async function fetchTrendingMeals() {
   return items;
 }
 
-/* ============================================================
-   ESTIMATE COOKING TIME
-   ============================================================ */
 function getCookingTime(meal) {
   const map = {
     Beef: "45 Min",
@@ -123,9 +111,6 @@ function getCookingTime(meal) {
   return "45 Min";
 }
 
-/* ============================================================
-   ESTIMATE DIFFICULTY
-   ============================================================ */
 function getDifficulty(meal) {
   const HARD = ["Beef", "Lamb", "Goat"];
   const EASY = ["Dessert", "Side", "Starter", "Breakfast"];
@@ -141,9 +126,6 @@ function getDifficulty(meal) {
   return "Hard";
 }
 
-/* ============================================================
-   MAIN COMPONENT
-   ============================================================ */
 export default function ExploreScreen({ navigation }) {
   const [activeCuisine, setActiveCuisine] = useState("All");
   const [recipes, setRecipes] = useState([]);
@@ -155,7 +137,6 @@ export default function ExploreScreen({ navigation }) {
 
   const scrollRef = useRef(null);
 
-  /* LOAD TRENDING */
   useEffect(() => {
     loadTrending();
   }, []);
@@ -167,7 +148,6 @@ export default function ExploreScreen({ navigation }) {
     setLoadingTrending(false);
   }
 
-  /* FETCH RECIPES */
   useEffect(() => {
     fetchRecipes();
   }, [activeCuisine, query]);
@@ -176,7 +156,6 @@ export default function ExploreScreen({ navigation }) {
     setLoading(true);
 
     try {
-      // SEARCH
       if (query.trim().length > 0) {
         const res = await fetch(
           `https://www.themealdb.com/api/json/v1/1/search.php?s=${query}`
@@ -187,7 +166,6 @@ export default function ExploreScreen({ navigation }) {
         return;
       }
 
-      // ALL RECIPES
       if (activeCuisine === "All") {
         let randomMeals = [];
         for (let i = 0; i < 8; i++) {
@@ -200,7 +178,6 @@ export default function ExploreScreen({ navigation }) {
         return;
       }
 
-      // CUISINE FILTER
       const res = await fetch(
         `https://www.themealdb.com/api/json/v1/1/filter.php?a=${activeCuisine}`
       );
@@ -213,9 +190,6 @@ export default function ExploreScreen({ navigation }) {
     }
   }
 
-  /* ============================================================
-     OPEN RECIPE
-     ============================================================ */
   async function handleOpenRecipe(id) {
     const res = await fetch(
       `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`
@@ -250,12 +224,8 @@ export default function ExploreScreen({ navigation }) {
     navigation.navigate("RecipeDetails", { recipe });
   }
 
-  /* ============================================================
-     HEADER
-     ============================================================ */
   const ListHeader = useCallback(() => (
     <View>
-      {/* SEARCH */}
       <View style={styles.searchBar}>
         <Ionicons name="search" size={20} color="#777" />
         <TextInput
@@ -267,11 +237,9 @@ export default function ExploreScreen({ navigation }) {
         />
       </View>
 
-      {/* CUISINES */}
       <Text style={styles.sectionTitle}>Popular Cuisines</Text>
 
       <ScrollView ref={scrollRef} horizontal showsHorizontalScrollIndicator={false}>
-        {/* All */}
         <TouchableOpacity
           style={[styles.chip, activeCuisine === "All" && styles.activeChip]}
           onPress={() => {
@@ -295,7 +263,6 @@ export default function ExploreScreen({ navigation }) {
                 setActiveCuisine(item.label);
                 setQuery("");
 
-                // scroll to selected chip
                 setTimeout(() => {
                   scrollRef.current?.scrollTo({
                     x: index * 80 - 60,
@@ -315,7 +282,6 @@ export default function ExploreScreen({ navigation }) {
         })}
       </ScrollView>
 
-      {/* TRENDING */}
       <Text style={styles.heading}>Trending</Text>
 
       {loadingTrending ? (
@@ -345,7 +311,6 @@ export default function ExploreScreen({ navigation }) {
         </ScrollView>
       )}
 
-      {/* SECTION TITLE */}
       <Text style={styles.heading}>
         {query.length > 0
           ? `Results for "${query}"`
@@ -356,14 +321,10 @@ export default function ExploreScreen({ navigation }) {
     </View>
   ), [query, activeCuisine, trending, loadingTrending]);
 
-  /* ============================================================
-     RETURN UI
-     ============================================================ */
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       {loading ? (
         <View style={{ padding: 20 }}>
-          {/* GRID SKELETON */}
           <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
             {[...Array(8)].map((_, i) => (
               <View key={i} style={styles.gridCard}>
@@ -415,9 +376,6 @@ export default function ExploreScreen({ navigation }) {
   );
 }
 
-/* ============================================================
-   STYLES
-   ============================================================ */
 const styles = StyleSheet.create({
   searchBar: {
     flexDirection: "row",

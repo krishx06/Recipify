@@ -19,7 +19,6 @@ export default function FavoritesScreen({ navigation }) {
 
   const isEmpty = favorites.length === 0;
 
-  // Fetch recommendations when favorites change
   useEffect(() => {
     if (favorites.length > 0) {
       fetchRecommendations();
@@ -29,7 +28,6 @@ export default function FavoritesScreen({ navigation }) {
   }, [favorites]);
 
   async function fetchRecommendations() {
-    // 1. Find top cuisine
     const cuisineCounts = {};
     favorites.forEach((fav) => {
       if (fav.cuisine) {
@@ -47,28 +45,23 @@ export default function FavoritesScreen({ navigation }) {
       }
     });
 
-    // If no specific cuisine found, maybe default to "Italian" or keep "All"
     if (topCuisine === "Mixed" || !topCuisine) topCuisine = "Italian"; // Default to Italian for better results
 
     try {
       setLoadingRecs(true);
-      // Use TheMealDB
       let url = `https://www.themealdb.com/api/json/v1/1/filter.php?a=${topCuisine}`;
 
       const res = await fetch(url);
       const data = await res.json();
 
       if (data.meals) {
-        // Filter out recipes that are already in favorites
         const favIds = new Set(favorites.map(f => f.id));
         const filtered = data.meals.filter(m => !favIds.has(m.idMeal));
 
-        // Map to our app's recipe format
         const mapped = filtered.map(m => ({
           id: m.idMeal,
           title: m.strMeal,
           image: m.strMealThumb,
-          // We don't have time/difficulty from this endpoint, so we can omit or mock
         }));
 
         setRecommendations(mapped.slice(0, 5));
@@ -87,13 +80,11 @@ export default function FavoritesScreen({ navigation }) {
         contentContainerStyle={{ paddingBottom: 100 }}
         style={styles.root}
       >
-        {/* TITLE */}
         <Text style={styles.title}>Favorite Recipes</Text>
         <Text style={styles.subtitle}>
           {favorites.length} item{favorites.length !== 1 ? "s" : ""} bookmarked
         </Text>
 
-        {/* EMPTY STATE */}
         {isEmpty && (
           <View style={styles.emptyBox}>
             <Image
@@ -107,7 +98,6 @@ export default function FavoritesScreen({ navigation }) {
           </View>
         )}
 
-        {/* SAVED LIST */}
         {!isEmpty && (
           <View style={styles.listWrapper}>
             {favorites.map((item) => (
@@ -117,7 +107,6 @@ export default function FavoritesScreen({ navigation }) {
                 onPress={() => navigation.navigate("RecipeDetails", { recipe: item })}
               >
                 <View style={styles.b2Card}>
-                  {/* ICON */}
                   <View style={styles.foodIconCircle}>
                     <Ionicons
                       name="restaurant-outline"
@@ -126,13 +115,11 @@ export default function FavoritesScreen({ navigation }) {
                     />
                   </View>
 
-                  {/* NAME + TIME */}
                   <View style={styles.textColumn}>
                     <Text style={styles.b2Title}>{item.title}</Text>
                     <Text style={styles.b2Time}>{item.time || "25 Min"}</Text>
                   </View>
 
-                  {/* DELETE */}
                   <TouchableOpacity
                     onPress={() => removeFavorite(item.id)}
                     style={styles.deleteWrapper}
@@ -145,7 +132,6 @@ export default function FavoritesScreen({ navigation }) {
           </View>
         )}
 
-        {/* YOU MAY ALSO LIKE */}
         {!isEmpty && recommendations.length > 0 && (
           <View style={styles.recommendBox}>
             <Text style={styles.recommendTitle}>You may also like</Text>

@@ -6,7 +6,6 @@ const FavoritesContext = createContext();
 export function FavoritesProvider({ children }) {
   const [favorites, setFavorites] = useState([]);
 
-  // Load saved favorites from storage on app start
   useEffect(() => {
     loadFavoritesFromStorage();
   }, []);
@@ -30,7 +29,6 @@ export function FavoritesProvider({ children }) {
     }
   }
 
-  // Add recipe
   function addFavorite(recipe) {
     const exists = favorites.some((item) => item.id === recipe.id);
     if (exists) return;
@@ -40,7 +38,6 @@ export function FavoritesProvider({ children }) {
     saveToStorage(updated);
   }
 
-  // Remove recipe
   function removeFavorite(id) {
     const updated = favorites.filter((item) => item.id !== id);
     setFavorites(updated);

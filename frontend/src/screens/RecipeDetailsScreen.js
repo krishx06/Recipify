@@ -11,13 +11,13 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useFavorites } from "../context/FavoritesContext";   // ✅ IMPORT CONTEXT
+import { useFavorites } from "../context/FavoritesContext";   
 import { RECIPE_DETAILS } from "../data/recipeDetails";
 
 export default function RecipeDetailsScreen({ navigation, route }) {
   const recipe = route?.params?.recipe;
 
-  // ❗ If no recipe data found
+
   if (!recipe) {
     return (
       <View style={styles.center}>
@@ -26,25 +26,20 @@ export default function RecipeDetailsScreen({ navigation, route }) {
     );
   }
 
-  // ⭐ Favorites Context
   const { favorites, addFavorite, removeFavorite } = useFavorites();
 
-  // ⭐ Local state for tab & saved status
   const [activeTab, setActiveTab] = useState("ingredients");
 
-  // ⭐ Sync saved state with global context
   const [saved, setSaved] = useState(false);
   useEffect(() => {
     const isSaved = favorites.some((item) => item.id === recipe.id);
     setSaved(isSaved);
   }, [favorites, recipe.id]);
 
-  // ⭐ Full preparation from local fallback data (optional)
   const manual = RECIPE_DETAILS[recipe.id];
   const ingredients = manual?.ingredients || recipe.ingredients;
   const instructions = manual?.instructions || recipe.instructions;
 
-  // ⭐ Save / Remove logic
   function toggleSave() {
     if (saved) {
       removeFavorite(recipe.id);
@@ -54,7 +49,6 @@ export default function RecipeDetailsScreen({ navigation, route }) {
     setSaved(!saved);
   }
 
-  // ⭐ Share recipe
   async function shareRecipe() {
     try {
       await Share.share({
@@ -67,22 +61,18 @@ export default function RecipeDetailsScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      {/* ⭐ FLOATING TOP BUTTONS */}
       <SafeAreaView style={[styles.safeTop, { position: "absolute", top: 0, zIndex: 20 }]}>
         <View style={styles.topButtons}>
 
-          {/* BACK */}
           <TouchableOpacity style={styles.roundBtn} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={22} color="#e11932" />
           </TouchableOpacity>
 
           <View style={{ flexDirection: "row", gap: 12 }}>
-            {/* SHARE */}
             <TouchableOpacity style={styles.roundBtn} onPress={shareRecipe}>
               <Ionicons name="share-outline" size={22} color="#e11932" />
             </TouchableOpacity>
 
-            {/* SAVE / UNSAVE */}
             <TouchableOpacity style={styles.roundBtn} onPress={toggleSave}>
               <Ionicons
                 name={saved ? "bookmark" : "bookmark-outline"}
@@ -95,18 +85,14 @@ export default function RecipeDetailsScreen({ navigation, route }) {
         </View>
       </SafeAreaView>
 
-      {/* CONTENT */}
       <ScrollView showsVerticalScrollIndicator={false}>
 
-        {/* IMAGE */}
         <View style={styles.imageContainer}>
           <Image source={{ uri: recipe.image }} style={styles.image} />
         </View>
 
-        {/* TITLE */}
         <Text style={styles.title}>{recipe.title}</Text>
 
-        {/* META INFO */}
         <View style={styles.metaRow}>
           <Meta icon="time-outline" text={recipe.time || "30 Min"} />
           <Meta icon="people-outline" text={`Serves ${recipe.serves || 4}`} />
@@ -114,7 +100,6 @@ export default function RecipeDetailsScreen({ navigation, route }) {
           <Meta icon="globe-outline" text={recipe.cuisine || "Not specified"} />
         </View>
 
-        {/* TABS */}
         <View style={styles.tabsRow}>
           <TabButton
             label="Ingredients"
@@ -128,7 +113,6 @@ export default function RecipeDetailsScreen({ navigation, route }) {
           />
         </View>
 
-        {/* CONTENT */}
         <View style={{ marginTop: 15, paddingBottom: 40 }}>
           {activeTab === "ingredients" ? (
             <IngredientsList items={ingredients || []} />
@@ -141,8 +125,6 @@ export default function RecipeDetailsScreen({ navigation, route }) {
     </View>
   );
 }
-
-// ------------- COMPONENTS ------------------
 
 const Meta = ({ icon, text }) => (
   <View style={styles.metaItem}>
@@ -208,7 +190,6 @@ const InstructionsList = ({ items }) => {
   );
 };
 
-// ------------- STYLES ----------------------
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },

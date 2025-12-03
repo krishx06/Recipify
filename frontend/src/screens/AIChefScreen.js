@@ -14,9 +14,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-/* ============================================================
-   CONSTANTS
-   ============================================================ */
 const QUICK_INGREDIENTS = [
   "Chicken",
   "Rice",
@@ -51,11 +48,8 @@ export default function AiChefScreen({ navigation }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const [loading, setLoading] = useState(false);
-  const [recipes, setRecipes] = useState([]); // Store generated recipes
+  const [recipes, setRecipes] = useState([]);
 
-  /* ============================================================
-     INGREDIENT ACTIONS
-     ============================================================ */
   function addIngredientFromInput() {
     const trimmed = input.trim();
     if (!trimmed) return;
@@ -82,9 +76,6 @@ export default function AiChefScreen({ navigation }) {
     setIngredients((s) => s.filter((x) => x !== item));
   }
 
-  /* ============================================================
-     CUISINE / CATEGORY SELECT
-     ============================================================ */
   function toggleCuisine(c) {
     setSelectedCuisine((prev) => (prev === c ? null : c));
   }
@@ -98,12 +89,9 @@ export default function AiChefScreen({ navigation }) {
     setInput("");
     setSelectedCuisine(null);
     setSelectedCategory(null);
-    setRecipes([]); // Clear recipes too
+    setRecipes([]);
   }
 
-  /* ============================================================
-     GENERATE WITH GEMINI API
-     ============================================================ */
   async function generateRecipes() {
     if (ingredients.length === 0) {
       Alert.alert("Add ingredients", "Please add at least one ingredient.");
@@ -112,7 +100,7 @@ export default function AiChefScreen({ navigation }) {
 
     try {
       setLoading(true);
-      setRecipes([]); // Clear previous results while loading
+      setRecipes([]);
 
       const res = await fetch("http://localhost:5001/ai/generate", {
         method: "POST",
@@ -132,7 +120,7 @@ export default function AiChefScreen({ navigation }) {
         return;
       }
 
-      setRecipes(data.recipes); // Set recipes to state
+      setRecipes(data.recipes);
     } catch (error) {
       setLoading(false);
       Alert.alert("Error", "Something went wrong while generating recipes.");
@@ -140,9 +128,6 @@ export default function AiChefScreen({ navigation }) {
     }
   }
 
-  /* ============================================================
-     HANDLE OPEN RECIPE
-     ============================================================ */
   const handleOpenRecipe = (recipe) => {
     const formattedRecipe = {
       id: Math.random().toString(),
@@ -158,12 +143,8 @@ export default function AiChefScreen({ navigation }) {
     navigation.navigate("RecipeDetails", { recipe: formattedRecipe });
   };
 
-  /* ============================================================
-     UI
-     ============================================================ */
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      {/* LOADING OVERLAY */}
       <Modal transparent visible={loading}>
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#e11932" />
@@ -178,7 +159,6 @@ export default function AiChefScreen({ navigation }) {
       >
         <Text style={styles.question}>What ingredients do you have?</Text>
 
-        {/* INPUT ROW */}
         <View style={styles.inputRow}>
           <TextInput
             value={input}
@@ -194,7 +174,6 @@ export default function AiChefScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* SELECTED INGREDIENT CHIPS */}
         <View style={styles.rowWrap}>
           {ingredients.map((it) => (
             <View key={it} style={styles.chipSelected}>
@@ -206,7 +185,6 @@ export default function AiChefScreen({ navigation }) {
           ))}
         </View>
 
-        {/* QUICK INGREDIENTS */}
         <Text style={styles.sectionTitle}>Quick add common ingredients</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {QUICK_INGREDIENTS.map((it) => {
@@ -225,7 +203,6 @@ export default function AiChefScreen({ navigation }) {
           })}
         </ScrollView>
 
-        {/* CUISINE */}
         <Text style={styles.filterHeading}>Cuisine</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {CUISINES.map((c) => {
@@ -244,7 +221,6 @@ export default function AiChefScreen({ navigation }) {
           })}
         </ScrollView>
 
-        {/* MEAL TYPE */}
         <Text style={styles.filterHeading}>Meal Type</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {RECIPE_CATEGORIES.map((cat) => {
@@ -263,12 +239,10 @@ export default function AiChefScreen({ navigation }) {
           })}
         </ScrollView>
 
-        {/* CLEAR */}
         <TouchableOpacity style={styles.clearBtn} onPress={clearAll}>
           <Text style={styles.clearText}>Clear</Text>
         </TouchableOpacity>
 
-        {/* GENERATE BUTTON */}
         <TouchableOpacity style={styles.generateBtn} onPress={generateRecipes}>
           <Ionicons
             name="sparkles"
@@ -281,7 +255,6 @@ export default function AiChefScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
 
-        {/* RESULTS LIST */}
         {recipes.length > 0 && (
           <View style={{ marginTop: 30 }}>
             <Text style={styles.resultsHeading}>AI Suggestions</Text>
@@ -321,9 +294,6 @@ export default function AiChefScreen({ navigation }) {
   );
 }
 
-/* ============================================================
-   STYLES
-   ============================================================ */
 const styles = StyleSheet.create({
   root: {
     flex: 1,
@@ -332,7 +302,6 @@ const styles = StyleSheet.create({
     paddingTop: 30,
   },
 
-  /* LOADING OVERLAY */
   loadingOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.3)",
@@ -493,7 +462,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  /* RESULTS STYLES */
   resultsHeading: {
     fontSize: 20,
     fontFamily: "TransformaSemiBold",

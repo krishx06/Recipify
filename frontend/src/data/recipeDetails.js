@@ -1,4 +1,3 @@
-// src/data/recipeDetails.js
 
 export const RECIPE_DETAILS = {
   pop1: {

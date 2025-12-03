@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-// 🔥 Direct JSON here
+
 const POPULAR = [
   {
     id: "pop1",

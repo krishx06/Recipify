@@ -12,7 +12,6 @@ export default function RandomRecipeCard({ selected, spinAndPick, navigation }) 
   return (
     <View style={styles.card}>
       
-      {/* LEFT SIDE (IMAGE OR LOTTIE) */}
       <View style={styles.left}>
         {!selected ? (
           <LottieView
@@ -29,7 +28,6 @@ export default function RandomRecipeCard({ selected, spinAndPick, navigation }) 
         )}
       </View>
 
-      {/* RIGHT SIDE TEXT + BUTTONS */}
       <View style={styles.right}>
         <Text style={styles.category}>
           {selected ? selected.category : "Get Started"}
@@ -40,7 +38,6 @@ export default function RandomRecipeCard({ selected, spinAndPick, navigation }) 
         </Text>
 
         <View style={styles.buttonRow}>
-          {/* SPIN BUTTON */}
           <TouchableOpacity
             style={[styles.btn, { backgroundColor: "#e11932" }]}
             onPress={spinAndPick}
@@ -48,7 +45,6 @@ export default function RandomRecipeCard({ selected, spinAndPick, navigation }) 
             <Text style={styles.btnText}>Spin</Text>
           </TouchableOpacity>
 
-          {/* VIEW BUTTON - ONLY IF RECIPE SELECTED */}
           {selected && (
             <TouchableOpacity
               style={[styles.btn, { backgroundColor: "#333" }]}

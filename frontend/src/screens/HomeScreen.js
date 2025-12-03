@@ -88,7 +88,6 @@ export default function HomeScreen({ navigation }) {
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       
-      {/* 🔥 Sticky Header */}
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
           {user.avatar ? (
@@ -112,7 +111,6 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* 🔥 Scrollable Body */}
       <ScrollView
         style={styles.scrollBody}
         showsVerticalScrollIndicator={false}
