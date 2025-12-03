@@ -62,4 +62,39 @@ A fully functional mobile app that:
 - Saved recipes are synced to MongoDB through backend APIs.
 - AI suggestions will improve over time using user history and preference learning.
 
----
+## 11. Local Setup Guide (Run Recipify on Your System)
+
+Follow these steps to run Recipify on your local machine since the app is not hosted yet.
+
+### Clone the Repository
+
+```bash
+git clone <repo-url>
+cd recipify
+```
+
+### Frontend Setup (React Native + Expo)
+```bash
+cd frontend
+npm install
+npx expo start
+```
+You can run the app using Expo Go, Android Emulator, or iOS Simulator(recommended).
+
+### Backend Setup (Node.js + Express + MongoDB)
+#### Create a .env file inside the backend folder
+```bash
+PORT=5001
+MONGO_URI=your_mongodb_connection_string
+GEMINI_API_KEY=your_gemini_api_key
+```
+```bash
+cd backend
+npm install
+npm start
+```
+
+Notes:
+- Make sure MongoDB is running (local or MongoDB Atlas).
+- The frontend communicates with the backend via http://localhost:5001.
+- Replace the placeholder values in .env with your actual keys.
