@@ -1,3 +1,7 @@
+## DEMO VIDEO:
+[Click here to visit the project](https://drive.google.com/file/d/1G0UstDc0bv_34IdQ_36FItwO0CX74XFw/view?usp=sharing)
+
+
 ## 1. Project Title  
 **Recipify - AI Powered modern recipe discovery app that helps users cook smarter — with AI-generated recipes, personalized suggestions, and seamless Google login.**
 
