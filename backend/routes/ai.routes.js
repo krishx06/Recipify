@@ -1,13 +1,12 @@
 import express from "express";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import { buildChefPrompt } from "../utils/buildPrompts.js";
 
 const router = express.Router();
 
 router.post("/generate", async (req, res) => {
     try {
-
-        const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
         const { ingredients, cuisine, mealType } = req.body;
 
@@ -19,16 +18,17 @@ router.post("/generate", async (req, res) => {
 
         const prompt = buildChefPrompt({ ingredients, cuisine, mealType });
 
-        console.log("Prompt sent to Gemini:\n", prompt);
+        console.log("Prompt sent to Groq:\n", prompt);
 
-        const model = ai.getGenerativeModel({
-            model: "gemini-2.0-flash-001",
+        const completion = await groq.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.7,
+            max_tokens: 4096,
         });
 
-        const result = await model.generateContent(prompt);
-
-        let text = result.response.text().trim();
-        console.log("Raw Gemini Response:", text);
+        let text = completion.choices[0].message.content.trim();
+        console.log("Raw Groq Response:", text);
 
         const jsonStart = text.indexOf("{");
         const jsonEnd = text.lastIndexOf("}");

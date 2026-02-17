@@ -8,7 +8,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
+    "groq-sdk": "^0.12.0",
     "@supabase/supabase-js": "^2.83.0",
     "axios": "^1.13.2",
     "cors": "^2.8.5",
